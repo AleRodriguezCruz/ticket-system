@@ -1,24 +1,28 @@
 <template>
-  <div class="max-w-2xl mx-auto">
+  <div class="max-w-2xl">
     <div class="flex items-center gap-3 mb-6">
-      <button @click="navigateTo('/tickets')" class="text-gray-400 hover:text-gray-600">← Volver</button>
-      <h1 class="text-2xl font-bold">➕ Nuevo Ticket</h1>
+      <button @click="navigateTo('/tickets')" class="text-xs px-3 py-1.5 rounded-lg transition-colors" style="color: var(--muted); border: 1px solid var(--border)">← Volver</button>
+      <div>
+        <h1 class="text-lg font-semibold" style="color: var(--text)">Nuevo Ticket</h1>
+        <p class="text-xs" style="color: var(--muted)">Reporta un nuevo problema o incidencia</p>
+      </div>
     </div>
 
     <div class="card">
       <form @submit.prevent="handleSubmit" class="space-y-5">
         <div>
-          <label class="label">Título *</label>
+          <label class="label">Título</label>
           <input v-model="form.title" class="input" placeholder="Descripción corta del problema" required />
         </div>
+
         <div>
-          <label class="label">Descripción *</label>
-          <textarea v-model="form.description" class="input h-32 resize-none"
-            placeholder="Explica el problema en detalle..." required />
+          <label class="label">Descripción</label>
+          <textarea v-model="form.description" class="input h-28 resize-none" placeholder="Explica el problema en detalle..." required />
         </div>
+
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="label">Categoría *</label>
+            <label class="label">Categoría</label>
             <select v-model="form.category" class="input" required>
               <option value="">Seleccionar...</option>
               <option value="Hardware">Hardware</option>
@@ -31,7 +35,7 @@
             </select>
           </div>
           <div>
-            <label class="label">Prioridad *</label>
+            <label class="label">Prioridad</label>
             <select v-model="form.priority" class="input" required>
               <option value="LOW">Baja</option>
               <option value="MEDIUM">Media</option>
@@ -41,12 +45,14 @@
           </div>
         </div>
 
-        <p v-if="error" class="text-red-500 text-sm">{{ error }}</p>
+        <div v-if="error" class="rounded-lg px-3 py-2 text-xs" style="background: rgba(239,68,68,0.1); color: var(--danger); border: 1px solid rgba(239,68,68,0.2)">
+          {{ error }}
+        </div>
 
-        <div class="flex justify-end gap-3 pt-2">
+        <div class="flex justify-end gap-2 pt-2">
           <button type="button" @click="navigateTo('/tickets')" class="btn-secondary">Cancelar</button>
           <button type="submit" class="btn-primary" :disabled="loading">
-            {{ loading ? 'Creando...' : '🎫 Crear Ticket' }}
+            {{ loading ? 'Creando...' : 'Crear Ticket' }}
           </button>
         </div>
       </form>

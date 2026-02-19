@@ -1,28 +1,74 @@
 <template>
-  <div class="min-h-screen bg-gray-50 flex">
+  <div class="min-h-screen flex" style="background: var(--bg)">
 
-    <aside class="w-64 bg-white shadow-md flex flex-col">
-      <div class="p-6 border-b">
-        <h1 class="text-xl font-bold text-indigo-600">🎫 TicketSystem</h1>
-        <p class="text-sm text-gray-500 mt-1">{{ auth.user?.name }}</p>
+    <!-- Sidebar -->
+    <aside class="w-60 flex flex-col fixed h-full" style="background: var(--sidebar)">
+
+      <!-- Logo -->
+      <div class="px-4 py-4 border-b border-white/10">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold" style="background: var(--accent)">
+            TS
+          </div>
+          <div>
+            <p class="text-sm font-semibold text-white">TicketSystem</p>
+            <p class="text-xs" style="color: #9ca3af">Panel de soporte</p>
+          </div>
+        </div>
       </div>
 
-      <nav class="flex-1 p-4 space-y-1">
-        <NuxtLink to="/"            class="nav-link">📊 Dashboard</NuxtLink>
-        <NuxtLink to="/tickets"     class="nav-link">🎫 Tickets</NuxtLink>
-        <NuxtLink to="/tickets/new" class="nav-link">➕ Nuevo Ticket</NuxtLink>
-        <NuxtLink to="/users"       class="nav-link" v-if="auth.isAdmin">👥 Usuarios</NuxtLink>
+      <!-- Nav -->
+      <nav class="flex-1 px-3 py-4 space-y-0.5">
+        <p class="px-3 mb-2 text-xs font-semibold uppercase tracking-wider" style="color: #6b7280">Principal</p>
+        <NuxtLink to="/" class="nav-link">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M3 12h18M3 17h18"/></svg>
+          Dashboard
+        </NuxtLink>
+        <NuxtLink to="/tickets" class="nav-link">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+          Tickets
+        </NuxtLink>
+        <NuxtLink to="/tickets/new" class="nav-link">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          Nuevo Ticket
+        </NuxtLink>
+
+        <div v-if="auth.isAdmin">
+          <p class="px-3 mt-4 mb-2 text-xs font-semibold uppercase tracking-wider" style="color: #6b7280">Administración</p>
+          <NuxtLink to="/users" class="nav-link">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197"/></svg>
+            Usuarios
+          </NuxtLink>
+        </div>
       </nav>
 
-      <div class="p-4 border-t">
-        <button @click="auth.logout()" class="w-full text-left text-red-500 hover:text-red-700 text-sm">
-          🚪 Cerrar sesión
-        </button>
+      <!-- User -->
+      <div class="px-3 py-4 border-t border-white/10">
+        <div class="flex items-center gap-2.5 px-3 py-2 rounded-md" style="background: rgba(255,255,255,0.06)">
+          <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold text-white flex-shrink-0" style="background: var(--accent)">
+            {{ auth.user?.name?.charAt(0) }}
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-xs font-medium text-white truncate">{{ auth.user?.name }}</p>
+            <p class="text-xs truncate" style="color: #9ca3af">{{ auth.user?.role }}</p>
+          </div>
+          <button @click="auth.logout()" title="Cerrar sesión">
+            <svg class="w-4 h-4" style="color: #9ca3af" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+          </button>
+        </div>
       </div>
     </aside>
 
-    <main class="flex-1 p-8 overflow-y-auto">
-      <slot />
+    <!-- Main -->
+    <main class="flex-1 ml-60 min-h-screen">
+      <!-- Top bar -->
+      <div class="px-8 py-3 border-b flex items-center justify-between" style="background: var(--surface); border-color: var(--border)">
+        <p class="text-xs" style="color: var(--muted)">Bienvenido, <span class="font-medium" style="color: var(--text)">{{ auth.user?.name }}</span></p>
+        <p class="text-xs" style="color: var(--muted)">{{ new Date().toLocaleDateString('es-MX', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) }}</p>
+      </div>
+      <div class="p-8">
+        <slot />
+      </div>
     </main>
 
   </div>
@@ -31,19 +77,8 @@
 <script setup>
 import { useAuthStore } from '~/stores/auth'
 const auth = useAuthStore()
-
 onMounted(() => {
   auth.loadFromStorage()
   if (!auth.isLoggedIn) navigateTo('/login')
 })
 </script>
-
-<style scoped>
-.nav-link {
-  @apply flex items-center gap-2 px-4 py-2 rounded-lg text-gray-600
-         hover:bg-indigo-50 hover:text-indigo-600 transition-colors text-sm font-medium;
-}
-.nav-link.router-link-active {
-  @apply bg-indigo-50 text-indigo-600;
-}
-</style>

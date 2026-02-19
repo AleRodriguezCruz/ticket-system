@@ -1,24 +1,95 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --bg:        #f3f4f6;
+  --surface:   #ffffff;
+  --surface2:  #f9fafb;
+  --border:    #e5e7eb;
+  --sidebar:   #1f2937;
+  --sidebar2:  #111827;
+  --accent:    #1d4ed8;
+  --accent-l:  #eff6ff;
+  --text:      #111827;
+  --muted:     #6b7280;
+  --danger:    #dc2626;
+  --warning:   #d97706;
+  --success:   #16a34a;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+}
+
 @layer components {
   .input {
-    @apply w-full border border-gray-200 rounded-lg px-3 py-2 text-sm
-           focus:outline-none focus:ring-2 focus:ring-indigo-400 transition;
+    @apply w-full rounded-md px-3 py-2 text-sm transition-all duration-150 outline-none;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
   }
+  .input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(29,78,216,0.1);
+  }
+  .input::placeholder { color: var(--muted); }
+
+  select.input {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    appearance: none;
+    padding-right: 32px;
+  }
+
   .label {
-    @apply block text-sm font-medium text-gray-600 mb-1;
+    @apply block text-xs font-medium mb-1.5;
+    color: var(--muted);
   }
+
   .btn-primary {
-    @apply bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium
-           hover:bg-indigo-700 transition disabled:opacity-50;
+    @apply px-4 py-2 rounded-md text-sm font-medium transition-all duration-150 disabled:opacity-50;
+    background: var(--accent);
+    color: #fff;
   }
+  .btn-primary:hover { background: #1e40af; }
+
   .btn-secondary {
-    @apply border border-gray-200 text-gray-600 px-4 py-2 rounded-lg text-sm
-           font-medium hover:bg-gray-50 transition;
+    @apply px-4 py-2 rounded-md text-sm font-medium transition-all duration-150;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--muted);
   }
+  .btn-secondary:hover { color: var(--text); border-color: #9ca3af; }
+
   .card {
-    @apply bg-white rounded-xl shadow p-5 border border-gray-100;
+    @apply rounded-lg p-5;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+
+  .nav-link {
+    @apply flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-all duration-150;
+    color: #9ca3af;
+  }
+  .nav-link:hover { background: rgba(255,255,255,0.08); color: #fff; }
+  .nav-link.router-link-active { background: rgba(255,255,255,0.12); color: #fff; font-weight: 500; }
+
+  .badge {
+    @apply px-2 py-0.5 rounded text-xs font-medium;
+  }
+
+  .page-header {
+    @apply flex items-center justify-between mb-6 pb-4;
+    border-bottom: 1px solid var(--border);
   }
 }
