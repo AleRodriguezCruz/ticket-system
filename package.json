@@ -3,7 +3,7 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "build": "nuxt build",
+    "build": "prisma generate && nuxt build",
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
@@ -27,9 +27,4 @@
     "@types/bcryptjs": "^2.4.6",
     "@types/jsonwebtoken": "^9.0.10"
   }
-  "scripts": {
-  "build": "prisma generate && nuxt build",
-  "dev": "nuxt dev",
-  "preview": "nuxt preview"
-}
 }
