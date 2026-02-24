@@ -1,84 +1,121 @@
 <template>
-  <div class="min-h-screen flex" style="background: var(--bg)">
+  <div class="flex h-screen overflow-hidden" style="background: var(--bg)">
 
-    <!-- Sidebar -->
-    <aside class="w-60 flex flex-col fixed h-full" style="background: var(--sidebar)">
+    <!-- SIDEBAR -->
+    <aside class="flex flex-col flex-shrink-0 overflow-y-auto"
+      style="width: 220px; background: var(--sidebar); border-right: 1px solid #0d1f33">
 
-      <!-- Logo -->
-      <div class="px-4 py-4 border-b border-white/10">
-        <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold" style="background: var(--accent)">
-            TS
-          </div>
-          <div>
-            <p class="text-sm font-semibold text-white">TicketSystem</p>
-            <p class="text-xs" style="color: #9ca3af">Panel de soporte</p>
-          </div>
+      <!-- Logo estilo Epicor -->
+      <div class="flex items-center gap-2 px-4 py-4"
+        style="border-bottom: 1px solid #0d1f33; min-height: 56px">
+        <div class="flex items-center justify-center rounded"
+          style="width:28px; height:28px; background: #0066cc">
+          <span class="text-white font-bold text-xs">TS</span>
+        </div>
+        <div>
+          <div class="font-bold text-white text-sm leading-tight">TicketSystem</div>
+          <div class="text-xs" style="color:#6b8aa8; font-size:10px">Visionaire Lighting</div>
         </div>
       </div>
 
       <!-- Nav -->
       <nav class="flex-1 px-3 py-4 space-y-0.5">
-        <p class="px-3 mb-2 text-xs font-semibold uppercase tracking-wider" style="color: #6b7280">Principal</p>
-        <NuxtLink to="/" class="nav-link">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M3 12h18M3 17h18"/></svg>
+        <p class="px-2 mb-1 text-xs font-semibold uppercase tracking-wider" style="color:#4a6680; font-size:10px">
+          Principal
+        </p>
+        <NuxtLink to="/" class="nav-link" :class="{ active: $route.path === '/' }">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
           Dashboard
         </NuxtLink>
-        <NuxtLink to="/tickets" class="nav-link">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+        <NuxtLink to="/tickets" class="nav-link" :class="{ active: $route.path.startsWith('/tickets') }">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
           Tickets
         </NuxtLink>
-        <NuxtLink to="/tickets/new" class="nav-link">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-          Nuevo Ticket
+        <NuxtLink to="/tickets/new" class="nav-link" :class="{ active: $route.path === '/tickets/new' }">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+          Nueva Incidencia
         </NuxtLink>
 
-        <div v-if="auth.isAdmin">
-          <p class="px-3 mt-4 mb-2 text-xs font-semibold uppercase tracking-wider" style="color: #6b7280">Administración</p>
-          <NuxtLink to="/users" class="nav-link">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197"/></svg>
-            Usuarios
-          </NuxtLink>
-        </div>
+        <p class="px-2 mt-4 mb-1 text-xs font-semibold uppercase tracking-wider" style="color:#4a6680; font-size:10px">
+          Administración
+        </p>
+        <NuxtLink v-if="auth.user?.role === 'ADMIN'" to="/users" class="nav-link"
+          :class="{ active: $route.path === '/users' }">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Usuarios
+        </NuxtLink>
       </nav>
 
-      <!-- User -->
-      <div class="px-3 py-4 border-t border-white/10">
-        <div class="flex items-center gap-2.5 px-3 py-2 rounded-md" style="background: rgba(255,255,255,0.06)">
-          <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold text-white flex-shrink-0" style="background: var(--accent)">
+      <!-- Usuario logueado -->
+      <div class="px-3 py-3" style="border-top: 1px solid #0d1f33">
+        <div class="flex items-center gap-2">
+          <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
+            style="background: #0066cc">
             {{ auth.user?.name?.charAt(0) }}
           </div>
           <div class="flex-1 min-w-0">
-            <p class="text-xs font-medium text-white truncate">{{ auth.user?.name }}</p>
-            <p class="text-xs truncate" style="color: #9ca3af">{{ auth.user?.role }}</p>
+            <div class="text-xs font-semibold text-white truncate">{{ auth.user?.name }}</div>
+            <div class="text-xs truncate" style="color:#4a6680">{{ auth.user?.role }}</div>
           </div>
-          <button @click="auth.logout()" title="Cerrar sesión">
-            <svg class="w-4 h-4" style="color: #9ca3af" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+          <button @click="auth.logout()" title="Cerrar sesión"
+            class="flex-shrink-0 transition-colors" style="color:#4a6680"
+            onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#4a6680'">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+              <polyline points="16,17 21,12 16,7"/>
+              <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
           </button>
         </div>
       </div>
     </aside>
 
-    <!-- Main -->
-    <main class="flex-1 ml-60 min-h-screen">
-      <!-- Top bar -->
-      <div class="px-8 py-3 border-b flex items-center justify-between" style="background: var(--surface); border-color: var(--border)">
-        <p class="text-xs" style="color: var(--muted)">Bienvenido, <span class="font-medium" style="color: var(--text)">{{ auth.user?.name }}</span></p>
-        <p class="text-xs" style="color: var(--muted)">{{ new Date().toLocaleDateString('es-MX', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) }}</p>
-      </div>
-      <div class="p-8">
-        <slot />
-      </div>
-    </main>
+    <!-- MAIN -->
+    <div class="flex flex-col flex-1 overflow-hidden">
 
+      <!-- TOPBAR estilo Epicor -->
+      <header class="flex items-center justify-between px-6 flex-shrink-0"
+        style="height:56px; background: var(--header); border-bottom: 1px solid #0d1f33">
+        <div class="text-sm font-semibold text-white">
+          {{ pageTitle }}
+        </div>
+        <div class="flex items-center gap-4">
+          <span class="text-xs" style="color:#6b8aa8">
+            {{ new Date().toLocaleDateString('es-MX', { weekday:'long', year:'numeric', month:'long', day:'numeric' }) }}
+          </span>
+          <div class="w-px h-4" style="background:#2a4060"></div>
+          <span class="text-xs font-medium" style="color:#a8bcce">{{ auth.user?.email }}</span>
+        </div>
+      </header>
+
+      <!-- Breadcrumb bar -->
+      <div class="px-6 py-2 flex items-center gap-1 text-xs flex-shrink-0"
+        style="background:#eef1f5; border-bottom:1px solid var(--border); color: var(--muted)">
+        <span>Inicio</span>
+        <span class="mx-1">›</span>
+        <span style="color: var(--accent); font-weight:600">{{ pageTitle }}</span>
+      </div>
+
+      <!-- Contenido -->
+      <main class="flex-1 overflow-y-auto p-6">
+        <slot />
+      </main>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { useAuthStore } from '~/stores/auth'
 const auth = useAuthStore()
-onMounted(() => {
-  auth.loadFromStorage()
-  if (!auth.isLoggedIn) navigateTo('/login')
+const route = useRoute()
+
+const pageTitle = computed(() => {
+  const map = {
+    '/': 'Dashboard',
+    '/tickets': 'Gestión de Tickets',
+    '/tickets/new': 'Nueva Incidencia',
+    '/users': 'Administración de Usuarios',
+  }
+  return map[route.path] || 'Tickets'
 })
 </script>
