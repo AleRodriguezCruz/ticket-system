@@ -6,7 +6,7 @@
         <h1 class="text-lg font-semibold" style="color: var(--text)">Tickets</h1>
         <p class="text-xs mt-0.5" style="color: var(--muted)">{{ ticketsFiltrados.length }} resultados</p>
       </div>
-      <NuxtLink to="/tickets/new" class="btn-primary">+ Nuevo</NuxtLink>
+      <NuxtLink to="/tickets/new" class="btn-primary">+ Nueva Incidencia</NuxtLink>
     </div>
 
     <!-- Filtros -->
@@ -24,7 +24,22 @@
         <option value="HIGH">Alta</option>
         <option value="CRITICAL">Crítica</option>
       </select>
-      <input v-model="filtros.search" class="input flex-1" placeholder="Buscar ticket..." />
+      <select v-model="filtros.category" class="input w-48">
+        <option value="">Categoría</option>
+        <optgroup label="── Epicor Kinetic ──">
+          <option value="Configurador">Configurador (CPQ)</option>
+          <option value="BAQ / Dashboard">BAQ / Dashboard</option>
+          <option value="Method Directive / BPM">Method Directive / BPM</option>
+          <option value="Customización">Customización de pantallas</option>
+          <option value="Usuarios y Permisos">Usuarios y Permisos</option>
+          <option value="Sincronización / Integración">Sincronización / Integración</option>
+        </optgroup>
+        
+        <optgroup label="── General ──">
+          <option value="Otro">Otro</option>
+        </optgroup>
+      </select>
+      <input v-model="filtros.search" class="input flex-1" placeholder="Buscar incidencia..." />
     </div>
 
     <!-- Tabla -->
@@ -58,7 +73,7 @@
           </tr>
           <tr v-if="ticketsFiltrados.length === 0">
             <td colspan="7" class="px-4 py-12 text-center text-sm" style="color: var(--muted); background: var(--surface)">
-              No hay tickets que mostrar
+              No hay incidencias que mostrar
             </td>
           </tr>
         </tbody>
@@ -69,14 +84,15 @@
 
 <script setup>
 const { data: tickets } = await useFetch('/api/tickets')
-const filtros = reactive({ status: '', priority: '', search: '' })
+const filtros = reactive({ status: '', priority: '', category: '', search: '' })
 
 const ticketsFiltrados = computed(() =>
   (tickets.value || []).filter(t => {
     const matchStatus   = !filtros.status   || t.status   === filtros.status
     const matchPriority = !filtros.priority || t.priority === filtros.priority
+    const matchCategory = !filtros.category || t.category === filtros.category
     const matchSearch   = !filtros.search   || t.title.toLowerCase().includes(filtros.search.toLowerCase())
-    return matchStatus && matchPriority && matchSearch
+    return matchStatus && matchPriority && matchCategory && matchSearch
   })
 )
 </script>
