@@ -32,11 +32,22 @@ model Ticket {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
+  comments     Comment[]
+
   createdById  Int
   assignedToId Int?
 
-  createdBy  User  @relation("CreatedBy", fields: [createdById], references: [id])
+  createdBy  User  @relation("CreatedBy",  fields: [createdById],  references: [id])
   assignedTo User? @relation("AssignedTo", fields: [assignedToId], references: [id])
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  text      String
+  author    String
+  ticketId  Int
+  ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
 }
 
 enum Status {
