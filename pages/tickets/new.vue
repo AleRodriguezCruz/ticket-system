@@ -88,4 +88,10 @@ async function handleSubmit() {
     loading.value = false
   }
 }
+
+async function handleSubmit() {
+  console.log('user:', auth.user)      // ← agrega esto
+  console.log('form:', { ...form })    // ← y esto
+  loading.value = true
+}
 </script>
