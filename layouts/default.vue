@@ -14,7 +14,7 @@
         </div>
         <div>
           <div class="font-bold text-white text-sm leading-tight">TicketSystem</div>
-          <div class="text-xs" style="color:#6b8aa8; font-size:10px">Visionaire Lighting</div>
+          <div class="text-xs" style="color:#6b8aa8; font-size:10px">Departamento Kinetic</div>
         </div>
       </div>
 
