@@ -7,37 +7,29 @@
         <p class="text-xs" style="color: var(--muted)">Reporta un nuevo problema o incidencia</p>
       </div>
     </div>
-
     <div class="card">
       <form @submit.prevent="handleSubmit" class="space-y-5">
-
         <div>
           <label class="label">Título</label>
           <input v-model="form.title" class="input" placeholder="Descripción corta del problema" required />
         </div>
-
         <div>
           <label class="label">Descripción</label>
           <textarea v-model="form.description" class="input h-28 resize-none" placeholder="Explica el problema en detalle..." required />
         </div>
-
         <div class="grid grid-cols-2 gap-4">
           <div>
             <label class="label">Categoría</label>
             <select v-model="form.category" class="input" required>
-              <option value="">Seleccionar categoría...</option>
-              <optgroup label="── Epicor Kinetic ──">
-                <option value="Configurador">Configurador (CPQ)</option>
-                <option value="BAQ / Dashboard">BAQ / Dashboard</option>
-                <option value="Method Directive / BPM">Method Directive / BPM</option>
-                <option value="Customización">Customización de pantallas</option>
-                <option value="Usuarios y Permisos">Usuarios y Permisos</option>
-                <option value="Sincronización / Integración">Sincronización / Integración</option>
-              </optgroup>
-              
+              <option value="" disabled>Seleccionar categoría...</option>
+              <option value="Configurador">Configurador (CPQ)</option>
+              <option value="BAQ / Dashboard">BAQ / Dashboard</option>
+              <option value="Method Directive / BPM">Method Directive / BPM</option>
+              <option value="Customización">Customización de pantallas</option>
+              <option value="Usuarios y Permisos">Usuarios y Permisos</option>
+              <option value="Sincronización / Integración">Sincronización / Integración</option>
             </select>
           </div>
-
           <div>
             <label class="label">Prioridad</label>
             <select v-model="form.priority" class="input" required>
@@ -48,19 +40,16 @@
             </select>
           </div>
         </div>
-
         <div v-if="error" class="rounded-lg px-3 py-2 text-xs"
           style="background: rgba(239,68,68,0.1); color: var(--danger); border: 1px solid rgba(239,68,68,0.2)">
           {{ error }}
         </div>
-
         <div class="flex justify-end gap-2 pt-2">
           <button type="button" @click="navigateTo('/tickets')" class="btn-secondary">Cancelar</button>
           <button type="submit" class="btn-primary" :disabled="loading">
             {{ loading ? 'Creando...' : 'Crear Incidencia' }}
           </button>
         </div>
-
       </form>
     </div>
   </div>
@@ -87,11 +76,5 @@ async function handleSubmit() {
   } finally {
     loading.value = false
   }
-}
-
-async function handleSubmit() {
-  console.log('user:', auth.user)      // ← agrega esto
-  console.log('form:', { ...form })    // ← y esto
-  loading.value = true
 }
 </script>
