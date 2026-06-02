@@ -39,8 +39,11 @@ model Ticket {
 
   createdBy  User  @relation("CreatedBy",  fields: [createdById],  references: [id])
   assignedTo User? @relation("AssignedTo", fields: [assignedToId], references: [id])
+<<<<<<< HEAD
 
   knowledgeArticle KnowledgeArticle?
+=======
+>>>>>>> cedc22be237c444deec09833a66085a6f0ecb67d
 }
 
 model Comment {
@@ -52,6 +55,7 @@ model Comment {
   createdAt DateTime @default(now())
 }
 
+<<<<<<< HEAD
 model KnowledgeArticle {
   id          Int      @id @default(autoincrement())
   ticketId    Int      @unique
@@ -68,6 +72,8 @@ model KnowledgeArticle {
   authorName  String
 }
 
+=======
+>>>>>>> cedc22be237c444deec09833a66085a6f0ecb67d
 enum Status {
   OPEN
   IN_PROGRESS
@@ -85,4 +91,8 @@ enum Role {
   ADMIN
   AGENT
   USER
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> cedc22be237c444deec09833a66085a6f0ecb67d

@@ -7,6 +7,7 @@
 
       <!-- Logo -->
       <div class="flex items-center gap-3 px-4 py-4" style="border-bottom:1px solid #0b1520; min-height:58px">
+<<<<<<< HEAD
         <div class="flex items-center justify-center rounded-lg flex-shrink-0" style="width:32px;height:32px;background:linear-gradient(135deg,#1a56db,#3b82f6)">
           style="width:32px;height:32px;background:linear-gradient(135deg,#1a56db,#3b82f6)">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
@@ -14,6 +15,12 @@
             <line x1="3" y1="12" x2="21" y2="12" stroke="white" stroke-width="1.5" stroke-dasharray="3,2" opacity="0.6"/>
             <line x1="7" y1="8" x2="14" y2="8" stroke="white" stroke-width="1.5" opacity="0.9"/>
             <line x1="7" y1="16" x2="12" y2="16" stroke="white" stroke-width="1.5" opacity="0.7"/>
+=======
+        <div class="flex items-center justify-center rounded-lg flex-shrink-0"
+          style="width:32px;height:32px;background:linear-gradient(135deg,#1a56db,#3b82f6)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+            <path d="M20 12V22H4V12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>
+>>>>>>> cedc22be237c444deec09833a66085a6f0ecb67d
           </svg>
         </div>
         <div>
