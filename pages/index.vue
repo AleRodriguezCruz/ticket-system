@@ -1,9 +1,9 @@
 <template>
   <div>
 
-    <!-- ══════════════════════════════════════════
+    <!-- ═══════════════════════════════════════
          ADMIN / AGENT
-    ══════════════════════════════════════════ -->
+    ═══════════════════════════════════════ -->
     <template v-if="isAdminOrAgent">
 
       <div class="flex items-center justify-between mb-5">
@@ -23,16 +23,14 @@
         </NuxtLink>
       </div>
 
-      <!-- Stat Cards -->
+      <!-- 4 stat cards -->
       <div class="grid grid-cols-4 gap-3 mb-4">
 
         <div class="stat-card green">
           <div class="flex items-start justify-between mb-2">
             <p class="text-xs font-semibold uppercase tracking-wider" style="color:var(--muted)">Abiertos</p>
             <div class="w-7 h-7 rounded-lg flex items-center justify-center" style="background:var(--success-soft)">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5">
-                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
-              </svg>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
             </div>
           </div>
           <p class="text-2xl font-semibold" style="color:#059669">{{ count('OPEN') }}</p>
@@ -43,9 +41,7 @@
           <div class="flex items-start justify-between mb-2">
             <p class="text-xs font-semibold uppercase tracking-wider" style="color:var(--muted)">En Progreso</p>
             <div class="w-7 h-7 rounded-lg flex items-center justify-center" style="background:var(--warning-soft)">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5">
-                <path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48 2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48 2.83-2.83"/>
-              </svg>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48 2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48 2.83-2.83"/></svg>
             </div>
           </div>
           <p class="text-2xl font-semibold" style="color:#d97706">{{ count('IN_PROGRESS') }}</p>
@@ -56,9 +52,7 @@
           <div class="flex items-start justify-between mb-2">
             <p class="text-xs font-semibold uppercase tracking-wider" style="color:var(--muted)">Cerrados</p>
             <div class="w-7 h-7 rounded-lg flex items-center justify-center" style="background:#f3f4f6">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22,4 12,14.01 9,11.01"/>
-              </svg>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22,4 12,14.01 9,11.01"/></svg>
             </div>
           </div>
           <p class="text-2xl font-semibold" style="color:#64748b">{{ count('CLOSED') }}</p>
@@ -69,9 +63,7 @@
           <div class="flex items-start justify-between mb-2">
             <p class="text-xs font-semibold uppercase tracking-wider" style="color:var(--muted)">Base Conocim.</p>
             <div class="w-7 h-7 rounded-lg flex items-center justify-center" style="background:var(--accent-soft)">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#1a56db" stroke-width="2.5">
-                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-              </svg>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#1a56db" stroke-width="2.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
             </div>
           </div>
           <p class="text-2xl font-semibold" style="color:#1a56db">{{ knowledgeCount }}</p>
@@ -80,19 +72,19 @@
 
       </div>
 
-      <!-- Fila gráficas: dona | barras mensuales | dona -->
+      <!-- Fila 1: dona estado | barras mes | dona prioridad -->
       <div class="grid gap-3 mb-3" style="grid-template-columns:188px 1fr 188px">
 
         <!-- Dona estado -->
         <div class="card" style="padding:14px 16px">
-          <p class="text-xs font-semibold uppercase tracking-wider mb-2" style="color:var(--muted)">Por Estado</p>
-          <div style="height:130px;display:flex;align-items:center;justify-content:center">
+          <p class="text-xs font-semibold uppercase tracking-wider mb-3" style="color:var(--muted)">Por Estado</p>
+          <div style="position:relative;width:100%;height:130px">
             <Doughnut :data="statusChart" :options="doughnutOpts" />
           </div>
-          <div class="space-y-1.5 mt-3">
-            <div v-for="item in statusLegend" :key="item.label" class="flex items-center justify-between">
-              <div class="flex items-center gap-1.5">
-                <div class="w-1.5 h-1.5 rounded-full flex-shrink-0" :style="`background:${item.color}`"></div>
+          <div style="margin-top:10px;display:flex;flex-direction:column;gap:5px">
+            <div v-for="item in statusLegend" :key="item.label" style="display:flex;align-items:center;justify-content:space-between">
+              <div style="display:flex;align-items:center;gap:5px">
+                <div style="width:6px;height:6px;border-radius:50%;flex-shrink:0" :style="`background:${item.color}`"></div>
                 <span style="font-size:11px;color:var(--muted)">{{ item.label }}</span>
               </div>
               <span style="font-size:11px;font-weight:600;color:var(--text)">{{ item.value }}</span>
@@ -102,27 +94,25 @@
 
         <!-- Barras mensuales -->
         <div class="card" style="padding:14px 16px">
-          <div class="flex items-center justify-between mb-2">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
             <p class="text-xs font-semibold uppercase tracking-wider" style="color:var(--muted)">Incidencias por Mes</p>
-            <span style="font-size:10.5px;background:var(--accent-soft);color:var(--accent);padding:2px 8px;border-radius:10px;font-weight:500">
-              Últimos 6 meses
-            </span>
+            <span style="font-size:10.5px;background:var(--accent-soft);color:var(--accent);padding:2px 8px;border-radius:10px;font-weight:500">Últimos 6 meses</span>
           </div>
-          <div style="height:178px">
+          <div style="position:relative;width:100%;height:176px">
             <Bar :data="monthlyChart" :options="barOpts" />
           </div>
         </div>
 
         <!-- Dona prioridad -->
         <div class="card" style="padding:14px 16px">
-          <p class="text-xs font-semibold uppercase tracking-wider mb-2" style="color:var(--muted)">Por Prioridad</p>
-          <div style="height:130px;display:flex;align-items:center;justify-content:center">
+          <p class="text-xs font-semibold uppercase tracking-wider mb-3" style="color:var(--muted)">Por Prioridad</p>
+          <div style="position:relative;width:100%;height:130px">
             <Doughnut :data="priorityChart" :options="doughnutOpts" />
           </div>
-          <div class="space-y-1.5 mt-3">
-            <div v-for="item in priorityLegend" :key="item.label" class="flex items-center justify-between">
-              <div class="flex items-center gap-1.5">
-                <div class="w-1.5 h-1.5 rounded-full flex-shrink-0" :style="`background:${item.color}`"></div>
+          <div style="margin-top:10px;display:flex;flex-direction:column;gap:5px">
+            <div v-for="item in priorityLegend" :key="item.label" style="display:flex;align-items:center;justify-content:space-between">
+              <div style="display:flex;align-items:center;gap:5px">
+                <div style="width:6px;height:6px;border-radius:50%;flex-shrink:0" :style="`background:${item.color}`"></div>
                 <span style="font-size:11px;color:var(--muted)">{{ item.label }}</span>
               </div>
               <span style="font-size:11px;font-weight:600;color:var(--text)">{{ item.value }}</span>
@@ -132,36 +122,35 @@
 
       </div>
 
-      <!-- Fila inferior: categorías + recientes -->
+      <!-- Fila 2: categorías | recientes -->
       <div class="grid grid-cols-2 gap-3">
 
         <div class="card" style="padding:14px 16px">
-          <p class="text-xs font-semibold uppercase tracking-wider mb-2" style="color:var(--muted)">Top Categorías</p>
-          <div style="height:168px">
+          <p class="text-xs font-semibold uppercase tracking-wider mb-3" style="color:var(--muted)">Top Categorías</p>
+          <div style="position:relative;width:100%;height:168px">
             <Bar :data="categoryChart" :options="categoryOpts" />
           </div>
         </div>
 
         <div class="card" style="padding:14px 16px">
-          <div class="flex items-center justify-between mb-3">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
             <p class="text-xs font-semibold uppercase tracking-wider" style="color:var(--muted)">Recientes</p>
             <NuxtLink to="/tickets" style="font-size:11px;font-weight:500;color:var(--accent)">Ver todos →</NuxtLink>
           </div>
-          <div class="space-y-1.5">
+          <div style="display:flex;flex-direction:column;gap:6px">
             <div
               v-for="t in recentTickets" :key="t.id"
-              class="flex items-center gap-2.5 px-2.5 py-2 rounded-lg cursor-pointer"
-              style="background:var(--surface2)"
+              style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:6px;background:var(--surface2);cursor:pointer"
               onmouseover="this.style.background='var(--surface3)'"
               onmouseout="this.style.background='var(--surface2)'"
               @click="navigateTo(`/tickets/${t.id}`)">
-              <div class="flex-1 min-w-0">
-                <p class="text-xs font-medium truncate" style="color:var(--text)">{{ t.title }}</p>
-                <p class="truncate mt-0.5" style="font-size:10.5px;color:var(--muted-2)">{{ t.category }}</p>
+              <div style="flex:1;min-width:0">
+                <p style="font-size:11.5px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ t.title }}</p>
+                <p style="font-size:10.5px;color:var(--muted-2);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ t.category }}</p>
               </div>
               <StatusBadge :status="t.status" />
             </div>
-            <div v-if="!recentTickets.length" class="text-center py-4" style="color:var(--muted-2);font-size:12px">
+            <div v-if="!recentTickets.length" style="text-align:center;padding:16px;color:var(--muted-2);font-size:12px">
               Sin incidencias aún
             </div>
           </div>
@@ -170,26 +159,24 @@
       </div>
     </template>
 
-    <!-- ══════════════════════════════════════════
+    <!-- ═══════════════════════════════════════
          USUARIO
-    ══════════════════════════════════════════ -->
+    ═══════════════════════════════════════ -->
     <template v-else>
 
-      <div class="mb-5">
+      <div style="margin-bottom:20px">
         <h1 class="text-lg font-semibold" style="color:var(--text)">Hola, {{ firstName }} 👋</h1>
         <p class="text-xs mt-0.5" style="color:var(--muted)">Consulta el estado de tus incidencias o reporta una nueva</p>
       </div>
 
-      <!-- Mis 3 stat cards -->
+      <!-- 3 stat cards personales -->
       <div class="grid grid-cols-3 gap-3 mb-4">
 
         <div class="stat-card green">
           <div class="flex items-start justify-between mb-2">
             <p class="text-xs font-semibold uppercase tracking-wider" style="color:var(--muted)">Mis Abiertos</p>
             <div class="w-7 h-7 rounded-lg flex items-center justify-center" style="background:var(--success-soft)">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5">
-                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
-              </svg>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
             </div>
           </div>
           <p class="text-2xl font-semibold" style="color:#059669">{{ myCount('OPEN') }}</p>
@@ -200,9 +187,7 @@
           <div class="flex items-start justify-between mb-2">
             <p class="text-xs font-semibold uppercase tracking-wider" style="color:var(--muted)">En Progreso</p>
             <div class="w-7 h-7 rounded-lg flex items-center justify-center" style="background:var(--warning-soft)">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5">
-                <path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48 2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48 2.83-2.83"/>
-              </svg>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48 2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48 2.83-2.83"/></svg>
             </div>
           </div>
           <p class="text-2xl font-semibold" style="color:#d97706">{{ myCount('IN_PROGRESS') }}</p>
@@ -213,9 +198,7 @@
           <div class="flex items-start justify-between mb-2">
             <p class="text-xs font-semibold uppercase tracking-wider" style="color:var(--muted)">Cerrados</p>
             <div class="w-7 h-7 rounded-lg flex items-center justify-center" style="background:#f3f4f6">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22,4 12,14.01 9,11.01"/>
-              </svg>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22,4 12,14.01 9,11.01"/></svg>
             </div>
           </div>
           <p class="text-2xl font-semibold" style="color:#64748b">{{ myCount('CLOSED') }}</p>
@@ -226,22 +209,18 @@
 
       <!-- CTA -->
       <div class="card mb-4" style="background:linear-gradient(135deg,#eff6ff 0%,#f0fdf4 100%);border-color:#bfdbfe;padding:16px 20px">
-        <div class="flex items-center justify-between gap-4">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:#1a56db">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
-              </svg>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:16px">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="width:40px;height:40px;border-radius:10px;background:#1a56db;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
             </div>
             <div>
-              <p class="text-sm font-semibold" style="color:#0f1923">¿Problema con Epicor Kinetic?</p>
-              <p class="text-xs mt-0.5" style="color:#4b5563">El equipo de soporte atenderá tu incidencia a la brevedad</p>
+              <p style="font-size:13px;font-weight:600;color:#0f1923">¿Problema con Epicor Kinetic?</p>
+              <p style="font-size:11.5px;color:#4b5563;margin-top:2px">El equipo de soporte atenderá tu incidencia a la brevedad</p>
             </div>
           </div>
-          <NuxtLink to="/tickets/new" class="btn-primary flex-shrink-0">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-            </svg>
+          <NuxtLink to="/tickets/new" class="btn-primary" style="flex-shrink:0">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Nueva Incidencia
           </NuxtLink>
         </div>
@@ -249,43 +228,37 @@
 
       <!-- Mis tickets -->
       <div class="card">
-        <div class="flex items-center justify-between mb-3 pb-3" style="border-bottom:1px solid var(--border-soft)">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border-soft)">
           <p class="text-sm font-semibold" style="color:var(--text)">Mis incidencias</p>
           <NuxtLink to="/tickets" style="font-size:11px;font-weight:500;color:var(--accent)">Ver todas →</NuxtLink>
         </div>
 
-        <div class="space-y-2">
+        <div style="display:flex;flex-direction:column;gap:6px">
           <div
             v-for="t in myRecentTickets" :key="t.id"
-            class="flex items-start gap-3 px-3 py-2.5 rounded-lg cursor-pointer"
-            style="background:var(--surface2)"
+            style="display:flex;align-items:flex-start;gap:10px;padding:9px 10px;border-radius:6px;background:var(--surface2);cursor:pointer"
             onmouseover="this.style.background='var(--surface3)'"
             onmouseout="this.style.background='var(--surface2)'"
             @click="navigateTo(`/tickets/${t.id}`)">
-            <div class="flex-1 min-w-0">
-              <div class="flex items-center gap-1.5 mb-1">
-                <span style="font-size:10.5px;font-family:var(--font-mono);color:var(--muted-2)">#{{ t.id }}</span>
-                <span style="font-size:10.5px;padding:1px 6px;border-radius:4px;background:var(--surface3);color:var(--muted)">
-                  {{ t.category }}
-                </span>
+            <div style="flex:1;min-width:0">
+              <div style="display:flex;align-items:center;gap:5px;margin-bottom:3px">
+                <span style="font-size:10.5px;font-family:monospace;color:var(--muted-2)">#{{ t.id }}</span>
+                <span style="font-size:10.5px;padding:1px 6px;border-radius:4px;background:var(--surface3);color:var(--muted)">{{ t.category }}</span>
               </div>
-              <p class="text-sm font-medium truncate" style="color:var(--text)">{{ t.title }}</p>
-              <p class="mt-0.5" style="font-size:11px;color:var(--muted-2)">
+              <p style="font-size:12.5px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ t.title }}</p>
+              <p style="font-size:10.5px;color:var(--muted-2);margin-top:2px">
                 {{ new Date(t.createdAt).toLocaleDateString('es-MX', { day:'numeric', month:'short', year:'numeric' }) }}
                 <span v-if="t.assignedTo"> · {{ t.assignedTo.name }}</span>
               </p>
             </div>
-            <div class="flex flex-col items-end gap-1 flex-shrink-0">
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
               <StatusBadge :status="t.status" />
               <PriorityBadge :priority="t.priority" />
             </div>
           </div>
 
-          <div v-if="!myRecentTickets.length" class="empty-state py-8">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-              <polyline points="14,2 14,8 20,8"/>
-            </svg>
+          <div v-if="!myRecentTickets.length" class="empty-state" style="padding:32px 0">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
             <p>Sin incidencias aún</p>
             <p class="text-xs" style="color:var(--muted-2)">Usa el botón de arriba para reportar tu primer problema</p>
           </div>
@@ -308,26 +281,21 @@ const { data: stats }     = await useFetch('/api/stats')
 const { data: tickets }   = await useFetch('/api/tickets')
 const { data: knowledge } = await useFetch('/api/knowledge')
 
-// ─── Identidad ───────────────────────────────────────────
 const isAdminOrAgent = computed(() => auth.user?.role !== 'USER')
 const firstName      = computed(() => auth.user?.name?.split(' ')[0] || '')
-const today          = new Date().toLocaleDateString('es-MX', {
-  weekday: 'long', day: 'numeric', month: 'long'
-})
+const today          = new Date().toLocaleDateString('es-MX', { weekday:'long', day:'numeric', month:'long' })
 
-// ─── Stats admin ─────────────────────────────────────────
+// ── Admin ──────────────────────────────────────────────
 const count          = (s) => stats.value?.byStatus.find(x => x.label === s)?.count || 0
 const knowledgeCount = computed(() => knowledge.value?.length || 0)
 const recentTickets  = computed(() => (tickets.value || []).slice(0, 6))
 
-// ─── Stats usuario ────────────────────────────────────────
-const myTickets       = computed(() =>
-  (tickets.value || []).filter(t => t.createdById === auth.user?.id)
-)
+// ── Usuario ────────────────────────────────────────────
+const myTickets       = computed(() => (tickets.value || []).filter(t => t.createdById === auth.user?.id))
 const myCount         = (s) => myTickets.value.filter(t => t.status === s).length
 const myRecentTickets = computed(() => myTickets.value.slice(0, 8))
 
-// ─── Legends ─────────────────────────────────────────────
+// ── Leyendas ───────────────────────────────────────────
 const statusLegend = computed(() => [
   { label: 'Abierto',     color: '#059669', value: count('OPEN')        },
   { label: 'En Progreso', color: '#d97706', value: count('IN_PROGRESS') },
@@ -340,50 +308,68 @@ const priorityLegend = computed(() => [
   { label: 'Crítica', color: '#ef4444', value: stats.value?.byPriority.find(p => p.label === 'CRITICAL')?.count || 0 },
 ])
 
-// ─── Chart options ───────────────────────────────────────
+// ── Chart options ──────────────────────────────────────
+// LA CLAVE: responsive:true + maintainAspectRatio:false
+// + el wrapper div con position:relative y height fijo
 const doughnutOpts = {
   responsive: true,
   maintainAspectRatio: false,
   cutout: '74%',
   plugins: {
-    legend: { display: false },
+    legend:  { display: false },
     tooltip: { callbacks: { label: ctx => ` ${ctx.parsed} tickets` } }
   }
 }
-const barOpts = {
+
+const barBase = {
   responsive: true,
   maintainAspectRatio: false,
   plugins: {
-    legend: { display: false },
+    legend:  { display: false },
     tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.y} tickets` } }
   },
   scales: {
     x: {
-      ticks:  { color: '#9ca3af', font: { size: 10 } },
+      ticks:  { color: '#9ca3af', font: { size: 10 }, maxRotation: 0 },
       grid:   { display: false },
       border: { display: false }
     },
     y: {
-      ticks:  { color: '#9ca3af', font: { size: 10 } },
+      ticks:  { color: '#9ca3af', font: { size: 10 }, precision: 0 },
       grid:   { color: '#f0f2f6', lineWidth: 1 },
       border: { display: false }
     }
   }
 }
+
+const barOpts = { ...barBase }
+
 const categoryOpts = {
-  ...barOpts,
+  ...barBase,
   indexAxis: 'y',
-  plugins: { legend: { display: false } }
+  plugins: { legend: { display: false } },
+  scales: {
+    x: {
+      ticks:  { color: '#9ca3af', font: { size: 10 }, precision: 0 },
+      grid:   { color: '#f0f2f6', lineWidth: 1 },
+      border: { display: false }
+    },
+    y: {
+      ticks:  { color: '#9ca3af', font: { size: 10 } },
+      grid:   { display: false },
+      border: { display: false }
+    }
+  }
 }
 
-// ─── Chart data ──────────────────────────────────────────
+// ── Chart data ─────────────────────────────────────────
 const statusChart = computed(() => ({
   labels: ['Abierto', 'En Progreso', 'Cerrado'],
   datasets: [{
-    data: [count('OPEN'), count('IN_PROGRESS'), count('CLOSED')],
+    data:            [count('OPEN'), count('IN_PROGRESS'), count('CLOSED')],
     backgroundColor: ['#059669', '#d97706', '#94a3b8'],
-    borderWidth: 0,
-    hoverOffset: 3
+    borderWidth:     0,
+    hoverOffset:     3
   }]
 }))
 
