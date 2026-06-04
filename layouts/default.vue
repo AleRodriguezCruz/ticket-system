@@ -68,7 +68,8 @@
 
         <p class="section-label">Administración</p>
 
-        <NuxtLink v-if="auth.user?.role === 'ADMIN'" to="/users" class="nav-link"
+        <!-- ⭐ USANDO EL GETTER isAdmin -->
+        <NuxtLink v-if="isAdmin" to="/users" class="nav-link"
           :class="{ active: $route.path === '/users' }">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
@@ -85,13 +86,13 @@
         <div class="flex items-center gap-2.5 px-2 py-1.5 rounded-lg" style="background:#162030">
           <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
             style="background:linear-gradient(135deg,#1a56db,#3b82f6)">
-            {{ auth.user?.name?.charAt(0)?.toUpperCase() }}
+            {{ user?.name?.charAt(0)?.toUpperCase() }}
           </div>
           <div class="flex-1 min-w-0">
-            <div class="text-xs font-semibold truncate" style="color:#c8d8e8">{{ auth.user?.name }}</div>
-            <div class="text-xs truncate" style="color:#4d6b8a;font-size:10px">{{ auth.user?.role }}</div>
+            <div class="text-xs font-semibold truncate" style="color:#c8d8e8">{{ user?.name }}</div>
+            <div class="text-xs truncate" style="color:#4d6b8a;font-size:10px">{{ user?.role }}</div>
           </div>
-          <button @click="auth.logout()" title="Cerrar sesión" class="flex-shrink-0 transition-colors rounded p-1"
+          <button @click="logout" title="Cerrar sesión" class="flex-shrink-0 transition-colors rounded p-1"
             style="color:#4d6b8a" onmouseover="this.style.color='#7ab3f5';this.style.background='rgba(26,86,219,0.15)'"
             onmouseout="this.style.color='#4d6b8a';this.style.background='transparent'">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -115,15 +116,15 @@
         </div>
         <div class="flex items-center gap-4">
           <span class="text-xs" style="color:#4d6b8a">
-            {{ new Date().toLocaleDateString('es-MX', { weekday:'long', year:'numeric', month:'long', day:'numeric' }) }}
+            {{ currentDate }}
           </span>
           <div class="w-px h-4" style="background:#1c2e42"></div>
           <div class="flex items-center gap-2">
             <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white"
               style="background:linear-gradient(135deg,#1a56db,#3b82f6)">
-              {{ auth.user?.name?.charAt(0)?.toUpperCase() }}
+              {{ user?.name?.charAt(0)?.toUpperCase() }}
             </div>
-            <span class="text-xs font-medium" style="color:#7a8fa6">{{ auth.user?.email }}</span>
+            <span class="text-xs font-medium" style="color:#7a8fa6">{{ user?.email }}</span>
           </div>
         </div>
       </header>
@@ -150,8 +151,20 @@
 
 <script setup>
 import { useAuthStore } from '~/stores/auth'
-const auth = useAuthStore()
+import { storeToRefs } from 'pinia'
+
+const authStore = useAuthStore()
+const { user, isAdmin, isLoggedIn } = storeToRefs(authStore)
+
+// ⭐ Cargar sesión al montar el componente
+onMounted(() => {
+  authStore.loadFromStorage()
+  console.log('📦 Layout mounted - User:', user.value)
+  console.log('👑 isAdmin:', isAdmin.value)
+})
+
 const route = useRoute()
+const router = useRouter()
 
 const pageTitle = computed(() => {
   const map = {
@@ -164,14 +177,27 @@ const pageTitle = computed(() => {
   return map[route.path] || 'Detalle de Ticket'
 })
 
-// Count open tickets for badge
+const currentDate = computed(() => {
+  return new Date().toLocaleDateString('es-MX', { 
+    weekday: 'long', 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
+  })
+})
+
 const openCount = ref(0)
+
 onMounted(async () => {
   try {
     const res = await $fetch('/api/stats')
     openCount.value = res?.byStatus?.find(s => s.label === 'OPEN')?.count || 0
   } catch {}
 })
+
+const logout = () => {
+  authStore.logout()
+}
 </script>
 
 <style scoped>
