@@ -15,7 +15,6 @@ export const useAuthStore = defineStore('auth', {
     setAuth(user, token) {
       this.user = user
       this.token = token
-      // ⭐ Solo ejecutar en el cliente
       if (process.client) {
         localStorage.setItem('token', token)
         localStorage.setItem('user', JSON.stringify(user))
@@ -23,17 +22,19 @@ export const useAuthStore = defineStore('auth', {
     },
 
     loadFromStorage() {
-      // ⭐ Solo ejecutar en el cliente
       if (!process.client) return false
       
       try {
         const token = localStorage.getItem('token')
         const user = localStorage.getItem('user')
         
+        console.log('🔐 loadFromStorage - Token:', token ? '✅ existe' : '❌ no existe')
+        console.log('🔐 loadFromStorage - User:', user ? user.substring(0, 50) : '❌ no existe')
+        
         if (token && user) {
           this.token = token
           this.user = JSON.parse(user)
-          console.log('✅ Sesión cargada:', this.user?.name)
+          console.log('✅ Sesión cargada correctamente:', this.user?.name)
           return true
         }
       } catch (e) {
