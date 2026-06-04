@@ -68,7 +68,6 @@
 
         <p class="section-label">Administración</p>
 
-        <!-- ⭐ Usando el getter isAdmin para mejor reactividad -->
         <NuxtLink v-if="isAdmin" to="/users" class="nav-link"
           :class="{ active: $route.path === '/users' }">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -157,13 +156,6 @@ const authStore = useAuthStore()
 const { user, isAdmin } = storeToRefs(authStore)
 const route = useRoute()
 
-// ⭐ Cargar sesión al montar el layout
-onMounted(() => {
-  authStore.loadFromStorage()
-  console.log('📦 Layout mounted - User:', user.value)
-  console.log('👑 isAdmin:', isAdmin.value)
-})
-
 // Computed properties para el template
 const userName = computed(() => user.value?.name || 'Usuario')
 const userEmail = computed(() => user.value?.email || '')
@@ -198,17 +190,22 @@ const pageTitle = computed(() => {
   return map[route.path] || 'Detalle de Ticket'
 })
 
-// Count open tickets for badge
 const openCount = ref(0)
 
+// ⭐ Solo ejecutar en el cliente
 onMounted(async () => {
-  try {
-    const res = await $fetch('/api/stats')
-    openCount.value = res?.byStatus?.find(s => s.label === 'OPEN')?.count || 0
-  } catch {}
+  if (process.client) {
+    authStore.loadFromStorage()
+    console.log('📦 Layout mounted - User:', user.value)
+    console.log('👑 isAdmin:', isAdmin.value)
+    
+    try {
+      const res = await $fetch('/api/stats')
+      openCount.value = res?.byStatus?.find(s => s.label === 'OPEN')?.count || 0
+    } catch {}
+  }
 })
 
-// ⭐ Manejador de logout
 const handleLogout = () => {
   authStore.logout()
 }
