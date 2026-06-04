@@ -68,7 +68,7 @@
 
         <p class="section-label">Administración</p>
 
-        <!-- ⭐ USANDO EL GETTER isAdmin -->
+        <!-- ⭐ Usando el getter isAdmin para mejor reactividad -->
         <NuxtLink v-if="isAdmin" to="/users" class="nav-link"
           :class="{ active: $route.path === '/users' }">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -86,13 +86,13 @@
         <div class="flex items-center gap-2.5 px-2 py-1.5 rounded-lg" style="background:#162030">
           <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
             style="background:linear-gradient(135deg,#1a56db,#3b82f6)">
-            {{ user?.name?.charAt(0)?.toUpperCase() }}
+            {{ userInitials }}
           </div>
           <div class="flex-1 min-w-0">
-            <div class="text-xs font-semibold truncate" style="color:#c8d8e8">{{ user?.name }}</div>
-            <div class="text-xs truncate" style="color:#4d6b8a;font-size:10px">{{ user?.role }}</div>
+            <div class="text-xs font-semibold truncate" style="color:#c8d8e8">{{ userName }}</div>
+            <div class="text-xs truncate" style="color:#4d6b8a;font-size:10px">{{ userRole }}</div>
           </div>
-          <button @click="logout" title="Cerrar sesión" class="flex-shrink-0 transition-colors rounded p-1"
+          <button @click="handleLogout" title="Cerrar sesión" class="flex-shrink-0 transition-colors rounded p-1"
             style="color:#4d6b8a" onmouseover="this.style.color='#7ab3f5';this.style.background='rgba(26,86,219,0.15)'"
             onmouseout="this.style.color='#4d6b8a';this.style.background='transparent'">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -122,9 +122,9 @@
           <div class="flex items-center gap-2">
             <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white"
               style="background:linear-gradient(135deg,#1a56db,#3b82f6)">
-              {{ user?.name?.charAt(0)?.toUpperCase() }}
+              {{ userInitials }}
             </div>
-            <span class="text-xs font-medium" style="color:#7a8fa6">{{ user?.email }}</span>
+            <span class="text-xs font-medium" style="color:#7a8fa6">{{ userEmail }}</span>
           </div>
         </div>
       </header>
@@ -154,17 +154,38 @@ import { useAuthStore } from '~/stores/auth'
 import { storeToRefs } from 'pinia'
 
 const authStore = useAuthStore()
-const { user, isAdmin, isLoggedIn } = storeToRefs(authStore)
+const { user, isAdmin } = storeToRefs(authStore)
+const route = useRoute()
 
-// ⭐ Cargar sesión al montar el componente
+// ⭐ Cargar sesión al montar el layout
 onMounted(() => {
   authStore.loadFromStorage()
   console.log('📦 Layout mounted - User:', user.value)
   console.log('👑 isAdmin:', isAdmin.value)
 })
 
-const route = useRoute()
-const router = useRouter()
+// Computed properties para el template
+const userName = computed(() => user.value?.name || 'Usuario')
+const userEmail = computed(() => user.value?.email || '')
+const userRole = computed(() => user.value?.role || '')
+const userInitials = computed(() => {
+  const name = user.value?.name || ''
+  return name
+    .split(' ')
+    .map(n => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
+})
+
+const currentDate = computed(() => {
+  return new Date().toLocaleDateString('es-MX', { 
+    weekday: 'long', 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
+  })
+})
 
 const pageTitle = computed(() => {
   const map = {
@@ -177,15 +198,7 @@ const pageTitle = computed(() => {
   return map[route.path] || 'Detalle de Ticket'
 })
 
-const currentDate = computed(() => {
-  return new Date().toLocaleDateString('es-MX', { 
-    weekday: 'long', 
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric' 
-  })
-})
-
+// Count open tickets for badge
 const openCount = ref(0)
 
 onMounted(async () => {
@@ -195,7 +208,8 @@ onMounted(async () => {
   } catch {}
 })
 
-const logout = () => {
+// ⭐ Manejador de logout
+const handleLogout = () => {
   authStore.logout()
 }
 </script>
