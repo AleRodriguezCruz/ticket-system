@@ -13,6 +13,12 @@
       </button>
     </div>
 
+    <!-- Mostrar error si hay problema de autenticación -->
+    <div v-if="authError" class="alert-error mb-4">
+      {{ authError }}
+      <button @click="redirectToLogin" class="ml-3 underline">Ir al login</button>
+    </div>
+
     <div class="table-container">
       <table class="w-full">
         <thead>
@@ -37,10 +43,10 @@
             </td>
             <td class="px-4 py-3.5 text-sm" style="color:var(--muted)">{{ user.email }}</td>
             <td class="px-4 py-3.5">
-              <span class="badge" :style="roleBadge(user.role)">{{ user.role }}</span>
+              <span class="badge" :style="roleBadge(user.role)">{{ getRoleLabel(user.role) }}</span>
             </td>
             <td class="px-4 py-3.5 text-xs font-mono" style="color:var(--muted-2)">
-              {{ new Date(user.createdAt).toLocaleDateString('es-MX') }}
+              {{ formatDate(user.createdAt) }}
             </td>
             <td class="px-4 py-3.5">
               <div class="flex items-center gap-1.5">
@@ -49,6 +55,29 @@
                   onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='transparent'">
                   Eliminar
                 </button>
+              </div>
+            </td>
+          </tr>
+          <tr v-if="!users.length && !loading && !authError">
+            <td colspan="5" class="px-4 py-12 text-center">
+              <div class="empty-state">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                  <circle cx="9" cy="7" r="4"/>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+                <p class="text-sm" style="color:var(--muted)">No hay usuarios registrados</p>
+              </div>
+            </td>
+          </tr>
+          <tr v-if="loading">
+            <td colspan="5" class="px-4 py-12 text-center">
+              <div class="flex justify-center">
+                <svg class="animate-spin h-6 w-6" style="color:var(--accent)" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
               </div>
             </td>
           </tr>
@@ -76,7 +105,7 @@
           </div>
           <div class="field">
             <label class="label">Correo electrónico</label>
-            <input v-model="form.email" type="email" class="input" placeholder="correo@empresa.com" required />
+            <input v-model="form.email" type="email" class="input" placeholder="correo@empresa.com" required :disabled="!!editingUser" />
           </div>
           <div class="field">
             <label class="label">{{ editingUser ? 'Nueva contraseña (dejar vacío para no cambiar)' : 'Contraseña' }}</label>
@@ -133,62 +162,197 @@
 </template>
 
 <script setup>
+import { useAuthStore } from '~/stores/auth'
+
+definePageMeta({
+  middleware: 'auth'
+})
+
+const authStore = useAuthStore()
+const router = useRouter()
+
+// Redirigir si no es ADMIN
+if (!authStore.isAdmin) {
+  router.push('/dashboard')
+}
+
 const users = ref([])
-const showModal   = ref(false)
-const showDelete  = ref(false)
-const editingUser  = ref(null)
+const showModal = ref(false)
+const showDelete = ref(false)
+const editingUser = ref(null)
 const deletingUser = ref(null)
 const loading = ref(false)
-const error   = ref('')
-const form = reactive({ name: '', email: '', password: '', role: 'USER' })
+const error = ref('')
+const authError = ref('')
+const form = reactive({ 
+  name: '', 
+  email: '', 
+  password: '', 
+  role: 'USER' 
+})
+
+// Función para obtener el label del rol en español
+function getRoleLabel(role) {
+  const labels = {
+    ADMIN: 'Administrador',
+    AGENT: 'Agente',
+    USER: 'Usuario'
+  }
+  return labels[role] || role
+}
 
 function roleBadge(role) {
   const map = {
     ADMIN: 'background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe',
     AGENT: 'background:#f0fdf4;color:#166534;border:1px solid #bbf7d0',
-    USER:  'background:#fff7ed;color:#c2410c;border:1px solid #fed7aa'
+    USER: 'background:#fff7ed;color:#c2410c;border:1px solid #fed7aa'
   }
   return map[role] || ''
 }
 
-async function fetchUsers() { users.value = await $fetch('/api/users') }
+function formatDate(date) {
+  if (!date) return '—'
+  return new Date(date).toLocaleDateString('es-MX')
+}
+
+// ⭐ Fetch users CON el token de autenticación
+async function fetchUsers() { 
+  loading.value = true
+  authError.value = ''
+  
+  try {
+    const token = authStore.token
+    if (!token) {
+      authError.value = 'No hay sesión activa. Por favor inicia sesión nuevamente.'
+      loading.value = false
+      return
+    }
+    
+    const data = await $fetch('/api/users', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+    users.value = data || []
+  } catch (error) {
+    console.error('Error fetching users:', error)
+    if (error.status === 401) {
+      authError.value = 'Sesión expirada o no autorizada'
+      // Opcional: redirigir al login después de 3 segundos
+      setTimeout(() => {
+        authStore.logout()
+      }, 3000)
+    } else {
+      authError.value = error.data?.message || 'Error al cargar usuarios'
+    }
+    users.value = []
+  } finally {
+    loading.value = false
+  }
+}
 
 function openCreate() {
   editingUser.value = null
-  form.name = ''; form.email = ''; form.password = ''; form.role = 'USER'
-  error.value = ''; showModal.value = true
+  form.name = ''
+  form.email = ''
+  form.password = ''
+  form.role = 'USER'
+  error.value = ''
+  showModal.value = true
 }
+
 function openEdit(user) {
   editingUser.value = user
-  form.name = user.name; form.email = user.email; form.password = ''; form.role = user.role
-  error.value = ''; showModal.value = true
+  form.name = user.name
+  form.email = user.email
+  form.password = ''
+  form.role = user.role
+  error.value = ''
+  showModal.value = true
 }
-function confirmDelete(user) { deletingUser.value = user; error.value = ''; showDelete.value = true }
-function closeModal() { showModal.value = false; editingUser.value = null }
+
+function confirmDelete(user) { 
+  deletingUser.value = user
+  error.value = ''
+  showDelete.value = true 
+}
+
+function closeModal() { 
+  showModal.value = false
+  editingUser.value = null
+}
+
+function redirectToLogin() {
+  authStore.logout()
+}
 
 async function handleSubmit() {
-  loading.value = true; error.value = ''
+  loading.value = true
+  error.value = ''
+  
   try {
+    const token = authStore.token
+    const headers = { 'Authorization': `Bearer ${token}` }
+    
     if (editingUser.value) {
-      const body = { name: form.name, email: form.email, role: form.role }
+      const body = { 
+        name: form.name, 
+        role: form.role 
+      }
       if (form.password) body.password = form.password
-      await $fetch(`/api/users/${editingUser.value.id}`, { method: 'PATCH', body })
+      
+      await $fetch(`/api/users/${editingUser.value.id}`, { 
+        method: 'PATCH', 
+        body,
+        headers
+      })
     } else {
-      await $fetch('/api/auth/register', { method: 'POST', body: { name: form.name, email: form.email, password: form.password, role: form.role } })
+      await $fetch('/api/auth/register', { 
+        method: 'POST', 
+        body: { 
+          name: form.name, 
+          email: form.email, 
+          password: form.password, 
+          role: form.role 
+        },
+        headers
+      })
     }
-    await fetchUsers(); closeModal()
-  } catch (e) { error.value = e?.data?.message || 'Error al guardar' }
-  finally { loading.value = false }
+    await fetchUsers()
+    closeModal()
+  } catch (e) { 
+    error.value = e?.data?.message || 'Error al guardar' 
+  } finally { 
+    loading.value = false 
+  }
 }
 
 async function handleDelete() {
-  loading.value = true; error.value = ''
+  loading.value = true
+  error.value = ''
+  
   try {
-    await $fetch(`/api/users/${deletingUser.value.id}`, { method: 'DELETE' })
-    await fetchUsers(); showDelete.value = false
-  } catch (e) { error.value = e?.data?.message || 'Error al eliminar' }
-  finally { loading.value = false }
+    await $fetch(`/api/users/${deletingUser.value.id}`, { 
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${authStore.token}`
+      }
+    })
+    await fetchUsers()
+    showDelete.value = false
+  } catch (e) { 
+    error.value = e?.data?.message || 'Error al eliminar' 
+  } finally { 
+    loading.value = false 
+  }
 }
 
-onMounted(fetchUsers)
+onMounted(() => {
+  // Verificar que hay token antes de cargar
+  if (authStore.token) {
+    fetchUsers()
+  } else {
+    authError.value = 'No hay sesión activa'
+  }
+})
 </script>
