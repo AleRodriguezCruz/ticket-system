@@ -1,16 +1,145 @@
+<template>
+  <div>
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h1 class="text-xl font-semibold tracking-tight" style="color:var(--text)">Usuarios</h1>
+        <p class="text-xs mt-0.5" style="color:var(--muted)">{{ users.length }} cuentas registradas en el sistema</p>
+      </div>
+      <button @click="openCreate" class="btn-primary">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        Nuevo Usuario
+      </button>
+    </div>
+
+    <!-- Loading state -->
+    <div v-if="loading" class="flex justify-center py-12">
+      <svg class="animate-spin h-8 w-8" style="color:var(--accent)" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+    </div>
+
+    <div v-else class="table-container">
+      <table class="w-full">
+        <thead>
+          <tr style="background:var(--surface2);border-bottom:1px solid var(--border-soft)">
+            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider" style="color:var(--muted)">Usuario</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider" style="color:var(--muted)">Correo</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider" style="color:var(--muted);width:120px">Rol</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider" style="color:var(--muted);width:130px">Registro</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider" style="color:var(--muted);width:120px">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="user in users" :key="user.id" class="table-row" style="cursor:default">
+            <td class="px-4 py-3.5">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
+                  style="background:linear-gradient(135deg,#1a56db,#3b82f6)">
+                  {{ user.name?.charAt(0)?.toUpperCase() }}
+                </div>
+                <span class="text-sm font-medium" style="color:var(--text)">{{ user.name }}</span>
+              </div>
+            </td>
+            <td class="px-4 py-3.5 text-sm" style="color:var(--muted)">{{ user.email }}</td>
+            <td class="px-4 py-3.5">
+              <span class="badge" :style="roleBadge(user.role)">{{ getRoleLabel(user.role) }}</span>
+            </td>
+            <td class="px-4 py-3.5 text-xs font-mono" style="color:var(--muted-2)">
+              {{ formatDate(user.createdAt) }}
+            </td>
+            <td class="px-4 py-3.5">
+              <div class="flex items-center gap-1.5">
+                <button @click="openEdit(user)" class="btn-ghost text-xs">Editar</button>
+                <button @click="confirmDelete(user)" class="btn-ghost text-xs" style="color:var(--danger)">Eliminar</button>
+              </div>
+            </td>
+          </tr>
+          <tr v-if="!users.length && !loading">
+            <td colspan="5" class="px-4 py-12 text-center">
+              <div class="empty-state">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                  <circle cx="9" cy="7" r="4"/>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+                <p class="text-sm" style="color:var(--muted)">No hay usuarios registrados</p>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Modal crear/editar -->
+    <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
+      <div class="modal-box w-full max-w-md p-6">
+        <div class="flex items-center justify-between mb-5">
+          <h2 class="text-base font-semibold" style="color:var(--text)">
+            {{ editingUser ? 'Editar Usuario' : 'Nuevo Usuario' }}
+          </h2>
+          <button @click="closeModal" class="btn-ghost p-1">✕</button>
+        </div>
+        <form @submit.prevent="handleSubmit" class="space-y-4">
+          <div class="field">
+            <label class="label">Nombre completo</label>
+            <input v-model="form.name" class="input" required />
+          </div>
+          <div class="field">
+            <label class="label">Correo electrónico</label>
+            <input v-model="form.email" type="email" class="input" required :disabled="!!editingUser" />
+          </div>
+          <div class="field">
+            <label class="label">{{ editingUser ? 'Nueva contraseña (opcional)' : 'Contraseña' }}</label>
+            <input v-model="form.password" type="password" class="input" :required="!editingUser" />
+          </div>
+          <div class="field">
+            <label class="label">Rol</label>
+            <select v-model="form.role" class="input" required>
+              <option value="USER">Usuario</option>
+              <option value="AGENT">Agente</option>
+              <option value="ADMIN">Administrador</option>
+            </select>
+          </div>
+          <div v-if="error" class="alert-error">{{ error }}</div>
+          <div class="flex justify-end gap-2">
+            <button type="button" @click="closeModal" class="btn-secondary">Cancelar</button>
+            <button type="submit" class="btn-primary">{{ editingUser ? 'Guardar' : 'Crear' }}</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal eliminar -->
+    <div v-if="showDelete" class="modal-overlay" @click.self="showDelete = false">
+      <div class="modal-box w-full max-w-sm p-6">
+        <h3 class="text-lg font-semibold mb-2">Confirmar eliminación</h3>
+        <p>¿Eliminar a <strong>{{ deletingUser?.name }}</strong>?</p>
+        <div class="flex justify-end gap-2 mt-4">
+          <button @click="showDelete = false" class="btn-secondary">Cancelar</button>
+          <button @click="handleDelete" class="btn-primary" style="background:#dc2626">Eliminar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
 <script setup>
-// ⭐ IMPORTANTE: Deshabilitar SSR para evitar error de localStorage
 definePageMeta({
-  middleware: 'auth',
   ssr: false
 })
 
 import { useAuthStore } from '~/stores/auth'
-import { storeToRefs } from 'pinia'
 
 const authStore = useAuthStore()
-const { token, isAdmin, user } = storeToRefs(authStore)
-const router = useRouter()
+
+// Cargar sesión inmediatamente
+if (process.client) {
+  authStore.loadFromStorage()
+}
 
 const users = ref([])
 const showModal = ref(false)
@@ -49,43 +178,25 @@ async function fetchUsers() {
   if (!process.client) return
   
   loading.value = true
-  error.value = ''
   
-  // ⭐ Obtener token directamente de localStorage si store está vacío
-  let authToken = token.value;
-  if (!authToken) {
-    authToken = localStorage.getItem('token');
-    console.log('⚠️ Token recuperado de localStorage directamente');
+  // Tomar token directamente de localStorage
+  const token = localStorage.getItem('token')
+  
+  if (!token) {
+    console.error('No hay token')
+    loading.value = false
+    return
   }
-  
-  if (!authToken) {
-    console.error('❌ No hay token de autenticación');
-    error.value = 'No hay sesión activa. Por favor inicia sesión nuevamente.';
-    loading.value = false;
-    return;
-  }
-  
-  console.log('🔑 Token usado:', authToken.substring(0, 50) + '...');
   
   try {
     const response = await $fetch('/api/users', {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${authToken}`,
-        'Content-Type': 'application/json'
-      }
+      headers: { 'Authorization': `Bearer ${token}` }
     })
     users.value = response || []
-    console.log('✅ Usuarios cargados:', users.value.length);
-    console.table(users.value.map(u => ({ name: u.name, email: u.email, role: u.role })));
+    console.log('Usuarios cargados:', users.value.length)
   } catch (err) {
-    console.error('❌ Error fetching users:', err)
-    error.value = err?.data?.message || err?.message || 'Error al cargar usuarios'
-    
-    if (err?.status === 401) {
-      alert('Sesión expirada. Redirigiendo al login...');
-      authStore.logout()
-    }
+    console.error('Error:', err)
+    error.value = 'Error al cargar usuarios'
   } finally {
     loading.value = false
   }
@@ -97,7 +208,6 @@ function openCreate() {
   form.email = ''
   form.password = ''
   form.role = 'USER'
-  error.value = ''
   showModal.value = true
 }
 
@@ -107,13 +217,11 @@ function openEdit(user) {
   form.email = user.email
   form.password = ''
   form.role = user.role
-  error.value = ''
   showModal.value = true
 }
 
 function confirmDelete(user) {
   deletingUser.value = user
-  error.value = ''
   showDelete.value = true
 }
 
@@ -125,13 +233,11 @@ function closeModal() {
 async function handleSubmit() {
   loading.value = true
   error.value = ''
+  
+  const token = localStorage.getItem('token')
+  const headers = { 'Authorization': `Bearer ${token}` }
+  
   try {
-    let authToken = token.value;
-    if (!authToken) {
-      authToken = localStorage.getItem('token');
-    }
-    const headers = { 'Authorization': `Bearer ${authToken}` }
-    
     if (editingUser.value) {
       const body = { name: form.name, role: form.role }
       if (form.password) body.password = form.password
@@ -163,36 +269,24 @@ async function handleSubmit() {
 
 async function handleDelete() {
   loading.value = true
-  error.value = ''
+  const token = localStorage.getItem('token')
+  
   try {
-    let authToken = token.value;
-    if (!authToken) {
-      authToken = localStorage.getItem('token');
-    }
     await $fetch(`/api/users/${deletingUser.value.id}`, {
       method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${authToken}` }
+      headers: { 'Authorization': `Bearer ${token}` }
     })
     await fetchUsers()
     showDelete.value = false
   } catch (e) {
-    error.value = e?.data?.message || 'Error al eliminar'
+    error.value = 'Error al eliminar'
   } finally {
     loading.value = false
   }
 }
 
-onMounted(() => {
-  if (process.client) {
-    // ⭐ Asegurar que el store tenga la sesión cargada
-    authStore.loadFromStorage();
-    
-    setTimeout(() => {
-      console.log('👤 Usuario en store:', authStore.user);
-      console.log('👑 isAdmin:', authStore.isAdmin);
-      console.log('🔑 Token existe:', !!authStore.token);
-      fetchUsers()
-    }, 100);
-  }
-})
+// Cargar usuarios inmediatamente
+if (process.client) {
+  fetchUsers()
+}
 </script>
