@@ -2,8 +2,8 @@ import { defineStore } from 'pinia'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    user: null,
-    token: null
+    user: null as any,
+    token: null as string | null
   }),
 
   getters: {
@@ -12,7 +12,7 @@ export const useAuthStore = defineStore('auth', {
   },
 
   actions: {
-    setAuth(user, token) {
+    setAuth(user: any, token: string) {
       this.user = user
       this.token = token
       if (process.client) {
@@ -23,18 +23,12 @@ export const useAuthStore = defineStore('auth', {
 
     loadFromStorage() {
       if (!process.client) return false
-      
       try {
         const token = localStorage.getItem('token')
         const user = localStorage.getItem('user')
-        
-        console.log('🔐 loadFromStorage - Token:', token ? '✅ existe' : '❌ no existe')
-        console.log('🔐 loadFromStorage - User:', user ? user.substring(0, 50) : '❌ no existe')
-        
         if (token && user) {
           this.token = token
           this.user = JSON.parse(user)
-          console.log('✅ Sesión cargada correctamente:', this.user?.name)
           return true
         }
       } catch (e) {
@@ -43,15 +37,15 @@ export const useAuthStore = defineStore('auth', {
       return false
     },
 
-    async login(email, password) {
+    async login(email: string, password: string) {
       try {
-        const data = await $fetch('/api/auth/login', {
+        const data: any = await $fetch('/api/auth/login', {
           method: 'POST',
           body: { email, password }
         })
         this.setAuth(data.user, data.token)
         return { success: true, user: data.user }
-      } catch (error) {
+      } catch (error: any) {
         return { success: false, error: error.data?.message || 'Error de autenticación' }
       }
     },
@@ -64,6 +58,16 @@ export const useAuthStore = defineStore('auth', {
         localStorage.removeItem('user')
       }
       navigateTo('/login')
+    },
+
+    fetchWithAuth(url: string, options: Record<string, any> = {}) {
+      return $fetch(url, {
+        ...options,
+        headers: {
+          ...options.headers,
+          Authorization: `Bearer ${this.token}`
+        }
+      })
     }
   }
 })
