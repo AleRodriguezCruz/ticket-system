@@ -1,425 +1,257 @@
 <template>
   <div>
-
-    <!-- ═══════════════════════════════════════
-         ADMIN / AGENT
-    ═══════════════════════════════════════ -->
+    <!-- ADMIN / AGENT VIEW -->
     <template v-if="isAdminOrAgent">
 
-      <div class="flex items-center justify-between mb-5">
+      <!-- Header -->
+      <div class="flex items-start justify-between mb-6">
         <div>
-          <h1 class="text-lg font-semibold" style="color:var(--text)">
-            Hola, {{ firstName }} 👋
+          <h1 class="text-xl font-semibold tracking-tight" style="color:var(--text)">
+            Buenos días, {{ firstName }} 👋
           </h1>
-          <p class="text-xs mt-0.5" style="color:var(--muted)">
-            {{ today }} · Panel de administración
+          <p class="text-xs mt-1" style="color:var(--muted)">
+            Aquí está el resumen del sistema al día de hoy
           </p>
         </div>
         <NuxtLink to="/tickets/new" class="btn-primary">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
           </svg>
           Nueva Incidencia
         </NuxtLink>
       </div>
 
-      <!-- 4 stat cards -->
-      <div class="grid grid-cols-4 gap-3 mb-4">
-
-        <div class="stat-card green">
-          <div class="flex items-start justify-between mb-2">
-            <p class="text-xs font-semibold uppercase tracking-wider" style="color:var(--muted)">Abiertos</p>
-            <div class="w-7 h-7 rounded-lg flex items-center justify-center" style="background:var(--success-soft)">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+      <!-- Stats -->
+      <div class="grid grid-cols-4 gap-3 mb-5">
+        <div class="stat-card green" v-for="s in stats" :key="s.label">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-semibold uppercase tracking-wider" style="color:var(--muted)">{{ s.label }}</span>
+            <div class="w-7 h-7 rounded-lg flex items-center justify-center" :style="`background:${s.bg}`">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" :stroke="s.color" stroke-width="2.5" v-html="s.icon"></svg>
             </div>
           </div>
-          <p class="text-2xl font-semibold" style="color:#059669">{{ count('OPEN') }}</p>
-          <p class="text-xs mt-0.5" style="color:var(--muted-2)">Requieren atención</p>
+          <div class="text-3xl font-bold mb-0.5" :style="`color:${s.color}`">{{ s.value }}</div>
+          <div class="text-xs" style="color:var(--muted-2)">{{ s.sub }}</div>
         </div>
-
-        <div class="stat-card amber">
-          <div class="flex items-start justify-between mb-2">
-            <p class="text-xs font-semibold uppercase tracking-wider" style="color:var(--muted)">En Progreso</p>
-            <div class="w-7 h-7 rounded-lg flex items-center justify-center" style="background:var(--warning-soft)">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48 2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48 2.83-2.83"/></svg>
-            </div>
-          </div>
-          <p class="text-2xl font-semibold" style="color:#d97706">{{ count('IN_PROGRESS') }}</p>
-          <p class="text-xs mt-0.5" style="color:var(--muted-2)">Siendo atendidos</p>
-        </div>
-
-        <div class="stat-card slate">
-          <div class="flex items-start justify-between mb-2">
-            <p class="text-xs font-semibold uppercase tracking-wider" style="color:var(--muted)">Cerrados</p>
-            <div class="w-7 h-7 rounded-lg flex items-center justify-center" style="background:#f3f4f6">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22,4 12,14.01 9,11.01"/></svg>
-            </div>
-          </div>
-          <p class="text-2xl font-semibold" style="color:#64748b">{{ count('CLOSED') }}</p>
-          <p class="text-xs mt-0.5" style="color:var(--muted-2)">Resueltos total</p>
-        </div>
-
-        <div class="stat-card blue">
-          <div class="flex items-start justify-between mb-2">
-            <p class="text-xs font-semibold uppercase tracking-wider" style="color:var(--muted)">Base Conocim.</p>
-            <div class="w-7 h-7 rounded-lg flex items-center justify-center" style="background:var(--accent-soft)">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#1a56db" stroke-width="2.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-            </div>
-          </div>
-          <p class="text-2xl font-semibold" style="color:#1a56db">{{ knowledgeCount }}</p>
-          <p class="text-xs mt-0.5" style="color:var(--muted-2)">Artículos documentados</p>
-        </div>
-
       </div>
 
-      <!-- Fila 1: dona estado | barras mes | dona prioridad -->
-      <div class="grid gap-3 mb-3" style="grid-template-columns:188px 1fr 188px">
+      <!-- Charts row -->
+      <div class="grid grid-cols-5 gap-4 mb-4">
 
-        <!-- Dona estado -->
-        <div class="card" style="padding:14px 16px">
-          <p class="text-xs font-semibold uppercase tracking-wider mb-3" style="color:var(--muted)">Por Estado</p>
-          <div style="position:relative;width:100%;height:130px">
-            <Doughnut v-if="stats" :data="statusChart" :options="doughnutOpts" />
-          </div>
-          <div style="margin-top:10px;display:flex;flex-direction:column;gap:5px">
-            <div v-for="item in statusLegend" :key="item.label" style="display:flex;align-items:center;justify-content:space-between">
-              <div style="display:flex;align-items:center;gap:5px">
-                <div style="width:6px;height:6px;border-radius:50%;flex-shrink:0" :style="`background:${item.color}`"></div>
-                <span style="font-size:11px;color:var(--muted)">{{ item.label }}</span>
+        <!-- Estado donut -->
+        <div class="card col-span-2">
+          <p class="text-xs font-semibold uppercase tracking-wider mb-4" style="color:var(--muted)">Por Estado</p>
+          <div class="flex items-center gap-5">
+            <svg width="100" height="100" viewBox="0 0 100 100" class="flex-shrink-0">
+              <circle cx="50" cy="50" r="36" fill="none" stroke="var(--surface3)" stroke-width="14"/>
+              <circle cx="50" cy="50" r="36" fill="none" stroke="#059669" stroke-width="14"
+                :stroke-dasharray="`${openPct * 2.262} ${226.2}`"
+                stroke-dashoffset="56.5" stroke-linecap="butt"/>
+              <circle cx="50" cy="50" r="36" fill="none" stroke="#d97706" stroke-width="14"
+                :stroke-dasharray="`${inPct * 2.262} ${226.2}`"
+                :stroke-dashoffset="`${56.5 - openPct * 2.262}`" stroke-linecap="butt"/>
+              <text x="50" y="46" text-anchor="middle" font-size="17" font-weight="700" fill="var(--text)">{{ total }}</text>
+              <text x="50" y="58" text-anchor="middle" font-size="8" fill="var(--muted-2)">total</text>
+            </svg>
+            <div class="space-y-2.5 flex-1">
+              <div v-for="s in statusLegend" :key="s.label" class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <div class="w-2 h-2 rounded-full flex-shrink-0" :style="`background:${s.color}`"></div>
+                  <span class="text-xs" style="color:var(--muted)">{{ s.label }}</span>
+                </div>
+                <span class="text-xs font-semibold" style="color:var(--text)">{{ s.value }}</span>
               </div>
-              <span style="font-size:11px;font-weight:600;color:var(--text)">{{ item.value }}</span>
             </div>
           </div>
         </div>
 
-        <!-- Barras mensuales -->
-        <div class="card" style="padding:14px 16px">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-            <p class="text-xs font-semibold uppercase tracking-wider" style="color:var(--muted)">Incidencias por Mes</p>
-            <span style="font-size:10.5px;background:var(--accent-soft);color:var(--accent);padding:2px 8px;border-radius:10px;font-weight:500">Últimos 6 meses</span>
-          </div>
-          <div style="position:relative;width:100%;height:176px">
-            <Bar v-if="stats" :data="monthlyChart" :options="barOpts" />
-          </div>
-        </div>
-
-        <!-- Dona prioridad -->
-        <div class="card" style="padding:14px 16px">
-          <p class="text-xs font-semibold uppercase tracking-wider mb-3" style="color:var(--muted)">Por Prioridad</p>
-          <div style="position:relative;width:100%;height:130px">
-            <Doughnut v-if="stats" :data="priorityChart" :options="doughnutOpts" />
-          </div>
-          <div style="margin-top:10px;display:flex;flex-direction:column;gap:5px">
-            <div v-for="item in priorityLegend" :key="item.label" style="display:flex;align-items:center;justify-content:space-between">
-              <div style="display:flex;align-items:center;gap:5px">
-                <div style="width:6px;height:6px;border-radius:50%;flex-shrink:0" :style="`background:${item.color}`"></div>
-                <span style="font-size:11px;color:var(--muted)">{{ item.label }}</span>
+        <!-- Categorías bar chart -->
+        <div class="card col-span-3">
+          <p class="text-xs font-semibold uppercase tracking-wider mb-4" style="color:var(--muted)">Incidencias por Categoría</p>
+          <div class="space-y-2.5">
+            <div v-for="c in topCategories" :key="c.name">
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-xs truncate" style="color:var(--text-2);max-width:200px">{{ c.name }}</span>
+                <span class="text-xs font-semibold ml-3 flex-shrink-0" style="color:var(--text)">{{ c.count }}</span>
               </div>
-              <span style="font-size:11px;font-weight:600;color:var(--text)">{{ item.value }}</span>
+              <div class="h-1.5 rounded-full" style="background:var(--surface3)">
+                <div class="h-full rounded-full transition-all duration-700"
+                  style="background:linear-gradient(90deg,#1a56db,#60a5fa)"
+                  :style="{ width: `${Math.max((c.count / maxCat) * 100, 4)}%` }"></div>
+              </div>
+            </div>
+            <div v-if="!topCategories.length" class="text-xs text-center py-4" style="color:var(--muted-2)">
+              Sin datos aún
             </div>
           </div>
         </div>
-
       </div>
 
-      <!-- Fila 2: categorías | recientes -->
-      <div class="grid grid-cols-2 gap-3">
+      <!-- Prioridades + Tabla recientes -->
+      <div class="grid grid-cols-5 gap-4">
 
-        <div class="card" style="padding:14px 16px">
-          <p class="text-xs font-semibold uppercase tracking-wider mb-3" style="color:var(--muted)">Top Categorías</p>
-          <div style="position:relative;width:100%;height:168px">
-            <Bar v-if="stats" :data="categoryChart" :options="categoryOpts" />
+        <!-- Prioridades -->
+        <div class="card col-span-2">
+          <p class="text-xs font-semibold uppercase tracking-wider mb-4" style="color:var(--muted)">Por Prioridad</p>
+          <div class="space-y-3">
+            <div v-for="p in priorityStats" :key="p.key">
+              <div class="flex items-center justify-between mb-1.5">
+                <div class="flex items-center gap-2">
+                  <span class="badge text-xs" :style="p.badgeStyle">{{ p.label }}</span>
+                </div>
+                <span class="text-xs font-semibold" style="color:var(--text)">{{ p.count }}</span>
+              </div>
+              <div class="h-1.5 rounded-full" style="background:var(--surface3)">
+                <div class="h-full rounded-full"
+                  :style="{ width: `${total ? Math.max((p.count/total)*100,p.count?4:0) : 0}%`, background: p.color }">
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="card" style="padding:14px 16px">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-            <p class="text-xs font-semibold uppercase tracking-wider" style="color:var(--muted)">Recientes</p>
-            <NuxtLink to="/tickets" style="font-size:11px;font-weight:500;color:var(--accent)">Ver todos →</NuxtLink>
+        <!-- Recientes -->
+        <div class="card-flush col-span-3">
+          <div class="flex items-center justify-between px-4 py-3" style="border-bottom:1px solid var(--border-soft)">
+            <p class="text-sm font-semibold" style="color:var(--text)">Recientes</p>
+            <NuxtLink to="/tickets" class="text-xs font-medium" style="color:var(--accent)">Ver todos →</NuxtLink>
           </div>
-          <div style="display:flex;flex-direction:column;gap:6px">
-            <div
-              v-for="t in recentTickets" :key="t.id"
-              style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:6px;background:var(--surface2);cursor:pointer"
-              onmouseover="this.style.background='var(--surface3)'"
-              onmouseout="this.style.background='var(--surface2)'"
+          <div>
+            <div v-for="t in recentTickets" :key="t.id"
+              class="flex items-center gap-3 px-4 py-3 table-row clickable"
               @click="navigateTo(`/tickets/${t.id}`)">
-              <div style="flex:1;min-width:0">
-                <p style="font-size:11.5px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ t.title }}</p>
-                <p style="font-size:10.5px;color:var(--muted-2);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ t.category }}</p>
-              </div>
-              <StatusBadge :status="t.status" />
-            </div>
-            <div v-if="!recentTickets.length" style="text-align:center;padding:16px;color:var(--muted-2);font-size:12px">
-              Sin incidencias aún
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </template>
-
-    <!-- ═══════════════════════════════════════
-         USUARIO
-    ═══════════════════════════════════════ -->
-    <template v-else>
-
-      <div style="margin-bottom:20px">
-        <h1 class="text-lg font-semibold" style="color:var(--text)">Hola, {{ firstName }} 👋</h1>
-        <p class="text-xs mt-0.5" style="color:var(--muted)">Consulta el estado de tus incidencias o reporta una nueva</p>
-      </div>
-
-      <!-- 3 stat cards personales -->
-      <div class="grid grid-cols-3 gap-3 mb-4">
-
-        <div class="stat-card green">
-          <div class="flex items-start justify-between mb-2">
-            <p class="text-xs font-semibold uppercase tracking-wider" style="color:var(--muted)">Mis Abiertos</p>
-            <div class="w-7 h-7 rounded-lg flex items-center justify-center" style="background:var(--success-soft)">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-            </div>
-          </div>
-          <p class="text-2xl font-semibold" style="color:#059669">{{ myCount('OPEN') }}</p>
-          <p class="text-xs mt-0.5" style="color:var(--muted-2)">Pendientes</p>
-        </div>
-
-        <div class="stat-card amber">
-          <div class="flex items-start justify-between mb-2">
-            <p class="text-xs font-semibold uppercase tracking-wider" style="color:var(--muted)">En Progreso</p>
-            <div class="w-7 h-7 rounded-lg flex items-center justify-center" style="background:var(--warning-soft)">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48 2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48 2.83-2.83"/></svg>
-            </div>
-          </div>
-          <p class="text-2xl font-semibold" style="color:#d97706">{{ myCount('IN_PROGRESS') }}</p>
-          <p class="text-xs mt-0.5" style="color:var(--muted-2)">Siendo atendidos</p>
-        </div>
-
-        <div class="stat-card slate">
-          <div class="flex items-start justify-between mb-2">
-            <p class="text-xs font-semibold uppercase tracking-wider" style="color:var(--muted)">Cerrados</p>
-            <div class="w-7 h-7 rounded-lg flex items-center justify-center" style="background:#f3f4f6">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22,4 12,14.01 9,11.01"/></svg>
-            </div>
-          </div>
-          <p class="text-2xl font-semibold" style="color:#64748b">{{ myCount('CLOSED') }}</p>
-          <p class="text-xs mt-0.5" style="color:var(--muted-2)">Resueltos</p>
-        </div>
-
-      </div>
-
-      <!-- CTA -->
-      <div class="card mb-4" style="background:linear-gradient(135deg,#eff6ff 0%,#f0fdf4 100%);border-color:#bfdbfe;padding:16px 20px">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:16px">
-          <div style="display:flex;align-items:center;gap:12px">
-            <div style="width:40px;height:40px;border-radius:10px;background:#1a56db;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-            </div>
-            <div>
-              <p style="font-size:13px;font-weight:600;color:#0f1923">¿Problema con Epicor Kinetic?</p>
-              <p style="font-size:11.5px;color:#4b5563;margin-top:2px">El equipo de soporte atenderá tu incidencia a la brevedad</p>
-            </div>
-          </div>
-          <NuxtLink to="/tickets/new" class="btn-primary" style="flex-shrink:0">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Nueva Incidencia
-          </NuxtLink>
-        </div>
-      </div>
-
-      <!-- Mis tickets -->
-      <div class="card">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border-soft)">
-          <p class="text-sm font-semibold" style="color:var(--text)">Mis incidencias</p>
-          <NuxtLink to="/tickets" style="font-size:11px;font-weight:500;color:var(--accent)">Ver todas →</NuxtLink>
-        </div>
-
-        <div style="display:flex;flex-direction:column;gap:6px">
-          <div
-            v-for="t in myRecentTickets" :key="t.id"
-            style="display:flex;align-items:flex-start;gap:10px;padding:9px 10px;border-radius:6px;background:var(--surface2);cursor:pointer"
-            onmouseover="this.style.background='var(--surface3)'"
-            onmouseout="this.style.background='var(--surface2)'"
-            @click="navigateTo(`/tickets/${t.id}`)">
-            <div style="flex:1;min-width:0">
-              <div style="display:flex;align-items:center;gap:5px;margin-bottom:3px">
-                <span style="font-size:10.5px;font-family:monospace;color:var(--muted-2)">#{{ t.id }}</span>
-                <span style="font-size:10.5px;padding:1px 6px;border-radius:4px;background:var(--surface3);color:var(--muted)">{{ t.category }}</span>
-              </div>
-              <p style="font-size:12.5px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ t.title }}</p>
-              <p style="font-size:10.5px;color:var(--muted-2);margin-top:2px">
-                {{ formatDate(t.createdAt) }}
-                <span v-if="t.assignedTo"> · {{ t.assignedTo.name }}</span>
-              </p>
-            </div>
-            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
+              <span class="text-xs font-mono flex-shrink-0" style="color:var(--muted-2);width:32px">#{{ t.id }}</span>
+              <span class="text-sm flex-1 truncate font-medium" style="color:var(--text)">{{ t.title }}</span>
               <StatusBadge :status="t.status" />
               <PriorityBadge :priority="t.priority" />
             </div>
-          </div>
-
-          <div v-if="!myRecentTickets.length" class="empty-state" style="padding:32px 0">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
-            <p>Sin incidencias aún</p>
-            <p class="text-xs" style="color:var(--muted-2)">Usa el botón de arriba para reportar tu primer problema</p>
+            <div v-if="!recentTickets.length" class="empty-state py-8">
+              <p style="color:var(--muted-2)">Sin incidencias aún</p>
+            </div>
           </div>
         </div>
       </div>
+    </template>
 
+    <!-- USER VIEW -->
+    <template v-else>
+      <div class="mb-6">
+        <h1 class="text-xl font-semibold tracking-tight" style="color:var(--text)">Hola, {{ firstName }} 👋</h1>
+        <p class="text-xs mt-1" style="color:var(--muted)">Estas son tus incidencias activas</p>
+      </div>
+
+      <div class="grid grid-cols-3 gap-3 mb-5">
+        <div class="stat-card green">
+          <p class="text-xs font-semibold uppercase tracking-wider mb-2" style="color:var(--muted)">Abiertas</p>
+          <p class="text-3xl font-bold" style="color:#059669">{{ myCount('OPEN') }}</p>
+        </div>
+        <div class="stat-card amber">
+          <p class="text-xs font-semibold uppercase tracking-wider mb-2" style="color:var(--muted)">En Progreso</p>
+          <p class="text-3xl font-bold" style="color:#d97706">{{ myCount('IN_PROGRESS') }}</p>
+        </div>
+        <div class="stat-card slate">
+          <p class="text-xs font-semibold uppercase tracking-wider mb-2" style="color:var(--muted)">Resueltas</p>
+          <p class="text-3xl font-bold" style="color:#475569">{{ myCount('CLOSED') }}</p>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between mb-4">
+        <p class="text-sm font-semibold" style="color:var(--text)">Mis Incidencias</p>
+        <NuxtLink to="/tickets/new" class="btn-primary text-xs" style="padding:6px 12px">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Reportar
+        </NuxtLink>
+      </div>
+
+      <div class="table-container">
+        <table class="w-full">
+          <thead>
+            <tr style="background:var(--surface2);border-bottom:1px solid var(--border-soft)">
+              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider" style="color:var(--muted)">#</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider" style="color:var(--muted)">Título</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider" style="color:var(--muted)">Estado</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider" style="color:var(--muted)">Prioridad</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider" style="color:var(--muted)">Fecha</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="t in myTickets" :key="t.id" class="table-row clickable" @click="navigateTo(`/tickets/${t.id}`)">
+              <td class="px-4 py-3 text-xs mono" style="color:var(--muted-2)">#{{ t.id }}</td>
+              <td class="px-4 py-3 text-sm font-medium" style="color:var(--text)">{{ t.title }}</td>
+              <td class="px-4 py-3"><StatusBadge :status="t.status" /></td>
+              <td class="px-4 py-3"><PriorityBadge :priority="t.priority" /></td>
+              <td class="px-4 py-3 text-xs mono" style="color:var(--muted-2)">
+                {{ new Date(t.createdAt).toLocaleDateString('es-MX') }}
+              </td>
+            </tr>
+            <tr v-if="!myTickets.length">
+              <td colspan="5">
+                <div class="empty-state">
+                  <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14,2 14,8 20,8"/>
+                  </svg>
+                  <p>No tienes incidencias reportadas</p>
+                  <NuxtLink to="/tickets/new" class="btn-primary text-xs" style="margin-top:4px;padding:6px 12px">
+                    Reportar primera incidencia
+                  </NuxtLink>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </template>
   </div>
 </template>
 
 <script setup>
-import { Bar, Doughnut } from 'vue-chartjs'
-import { Chart, registerables } from 'chart.js'
 import { useAuthStore } from '~/stores/auth'
-import { storeToRefs } from 'pinia'
+const auth = useAuthStore()
+const { data: tickets } = await useFetch('/api/tickets')
 
-Chart.register(...registerables)
+const isAdminOrAgent = computed(() => ['ADMIN','AGENT'].includes(auth.user?.role))
+const firstName = computed(() => auth.user?.name?.split(' ')[0] || 'Usuario')
+const total = computed(() => tickets.value?.length || 0)
 
-const authStore = useAuthStore()
-const { token, user } = storeToRefs(authStore)
+const countS   = s => tickets.value?.filter(t => t.status === s).length ?? 0
+const countP   = p => tickets.value?.filter(t => t.priority === p).length ?? 0
+const myTickets= computed(() => tickets.value?.filter(t => t.createdById === auth.user?.id) ?? [])
+const myCount  = s => myTickets.value.filter(t => t.status === s).length
 
-// ⭐ Esperar a que la sesión esté cargada
-await authStore.loadFromStorage()
+const openPct = computed(() => total.value ? (countS('OPEN') / total.value) * 100 : 0)
+const inPct   = computed(() => total.value ? (countS('IN_PROGRESS') / total.value) * 100 : 0)
+const recentTickets = computed(() =>
+  [...(tickets.value ?? [])].sort((a,b) => new Date(b.createdAt)-new Date(a.createdAt)).slice(0,6)
+)
 
-// ⭐ Función helper para hacer fetch con autenticación
-const fetchWithAuth = async (url) => {
-  return $fetch(url, {
-    headers: {
-      'Authorization': `Bearer ${token.value}`
-    }
-  })
-}
+const stats = computed(() => [
+  { label:'Abiertos',    value: countS('OPEN'),        sub:'Requieren atención', color:'#059669', bg:'rgba(5,150,105,0.08)',  icon:'<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>' },
+  { label:'En Progreso', value: countS('IN_PROGRESS'), sub:'Siendo atendidos',   color:'#d97706', bg:'rgba(217,119,6,0.08)',  icon:'<circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/>' },
+  { label:'Cerrados',    value: countS('CLOSED'),       sub:'Resueltos',          color:'#475569', bg:'rgba(71,85,105,0.08)', icon:'<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22,4 12,14.01 9,11.01"/>' },
+  { label:'Total',       value: total.value,            sub:'En el sistema',      color:'#1a56db', bg:'rgba(26,86,219,0.08)', icon:'<rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>' },
+])
 
-// ⭐ Fetch data con el token
-const { data: stats } = await useAsyncData('stats', () => fetchWithAuth('/api/stats'))
-const { data: tickets } = await useAsyncData('tickets', () => fetchWithAuth('/api/tickets'))
-const { data: knowledge } = await useAsyncData('knowledge', () => fetchWithAuth('/api/knowledge'))
-
-const isAdminOrAgent = computed(() => user.value?.role !== 'USER')
-const firstName = computed(() => user.value?.name?.split(' ')[0] || '')
-const today = new Date().toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' })
-
-const formatDate = (date) => {
-  if (!date) return ''
-  return new Date(date).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })
-}
-
-// ── Admin ──────────────────────────────────────────────
-const count = (s) => stats.value?.byStatus?.find(x => x.label === s)?.count || 0
-const knowledgeCount = computed(() => knowledge.value?.length || 0)
-const recentTickets = computed(() => (tickets.value || []).slice(0, 6))
-
-// ── Usuario ────────────────────────────────────────────
-const myTickets = computed(() => (tickets.value || []).filter(t => t.createdById === user.value?.id))
-const myCount = (s) => myTickets.value.filter(t => t.status === s).length
-const myRecentTickets = computed(() => myTickets.value.slice(0, 8))
-
-// ── Leyendas ───────────────────────────────────────────
 const statusLegend = computed(() => [
-  { label: 'Abierto', color: '#059669', value: count('OPEN') },
-  { label: 'En Progreso', color: '#d97706', value: count('IN_PROGRESS') },
-  { label: 'Cerrado', color: '#94a3b8', value: count('CLOSED') },
+  { label:'Abiertos',    value: countS('OPEN'),        color:'#059669' },
+  { label:'En Progreso', value: countS('IN_PROGRESS'), color:'#d97706' },
+  { label:'Cerrados',    value: countS('CLOSED'),       color:'#94a3b8' },
 ])
 
-const priorityLegend = computed(() => [
-  { label: 'Baja', color: '#60a5fa', value: stats.value?.byPriority?.find(p => p.label === 'LOW')?.count || 0 },
-  { label: 'Media', color: '#34d399', value: stats.value?.byPriority?.find(p => p.label === 'MEDIUM')?.count || 0 },
-  { label: 'Alta', color: '#f59e0b', value: stats.value?.byPriority?.find(p => p.label === 'HIGH')?.count || 0 },
-  { label: 'Crítica', color: '#ef4444', value: stats.value?.byPriority?.find(p => p.label === 'CRITICAL')?.count || 0 },
+const topCategories = computed(() => {
+  const m = {}
+  tickets.value?.forEach(t => { m[t.category] = (m[t.category]||0)+1 })
+  return Object.entries(m).map(([name,count]) => ({name,count}))
+    .sort((a,b)=>b.count-a.count).slice(0,6)
+})
+const maxCat = computed(() => topCategories.value[0]?.count || 1)
+
+const priorityStats = computed(() => [
+  { key:'CRITICAL', label:'Crítica', color:'#dc2626', count: countP('CRITICAL'), badgeStyle:'background:#fef2f2;color:#b91c1c;border:1px solid #fecaca' },
+  { key:'HIGH',     label:'Alta',    color:'#f97316', count: countP('HIGH'),     badgeStyle:'background:#fff7ed;color:#c2410c;border:1px solid #fed7aa' },
+  { key:'MEDIUM',   label:'Media',   color:'#eab308', count: countP('MEDIUM'),   badgeStyle:'background:#fefce8;color:#854d0e;border:1px solid #fde68a' },
+  { key:'LOW',      label:'Baja',    color:'#3b82f6', count: countP('LOW'),      badgeStyle:'background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe' },
 ])
-
-// ── Chart options ──────────────────────────────────────
-const doughnutOpts = {
-  responsive: true,
-  maintainAspectRatio: false,
-  cutout: '74%',
-  plugins: {
-    legend: { display: false },
-    tooltip: { callbacks: { label: ctx => ` ${ctx.parsed} tickets` } }
-  }
-}
-
-const barBase = {
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: { display: false },
-    tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.y} tickets` } }
-  },
-  scales: {
-    x: {
-      ticks: { color: '#9ca3af', font: { size: 10 }, maxRotation: 0 },
-      grid: { display: false },
-      border: { display: false }
-    },
-    y: {
-      ticks: { color: '#9ca3af', font: { size: 10 }, precision: 0 },
-      grid: { color: '#f0f2f6', lineWidth: 1 },
-      border: { display: false }
-    }
-  }
-}
-
-const barOpts = { ...barBase }
-
-const categoryOpts = {
-  ...barBase,
-  indexAxis: 'y',
-  plugins: { legend: { display: false } },
-  scales: {
-    x: {
-      ticks: { color: '#9ca3af', font: { size: 10 }, precision: 0 },
-      grid: { color: '#f0f2f6', lineWidth: 1 },
-      border: { display: false }
-    },
-    y: {
-      ticks: { color: '#9ca3af', font: { size: 10 } },
-      grid: { display: false },
-      border: { display: false }
-    }
-  }
-}
-
-// ── Chart data ─────────────────────────────────────────
-const statusChart = computed(() => ({
-  labels: ['Abierto', 'En Progreso', 'Cerrado'],
-  datasets: [{
-    data: [count('OPEN'), count('IN_PROGRESS'), count('CLOSED')],
-    backgroundColor: ['#059669', '#d97706', '#94a3b8'],
-    borderWidth: 0,
-    hoverOffset: 3
-  }]
-}))
-
-const monthlyChart = computed(() => ({
-  labels: (stats.value?.monthly || []).map(m => m.month?.slice(5)).reverse(),
-  datasets: [{
-    data: (stats.value?.monthly || []).map(m => m.count).reverse(),
-    backgroundColor: '#1a56db',
-    borderRadius: 5,
-    borderSkipped: false
-  }]
-}))
-
-const categoryChart = computed(() => ({
-  labels: (stats.value?.byCategory || []).slice(0, 5).map(c => c.label),
-  datasets: [{
-    data: (stats.value?.byCategory || []).slice(0, 5).map(c => c.count),
-    backgroundColor: '#7c3aed',
-    borderRadius: 4,
-    borderSkipped: false
-  }]
-}))
-
-const priorityChart = computed(() => ({
-  labels: ['Baja', 'Media', 'Alta', 'Crítica'],
-  datasets: [{
-    data: priorityLegend.value.map(p => p.value),
-    backgroundColor: ['#60a5fa', '#34d399', '#f59e0b', '#ef4444'],
-    borderWidth: 0,
-    hoverOffset: 3
-  }]
-}))
 </script>
