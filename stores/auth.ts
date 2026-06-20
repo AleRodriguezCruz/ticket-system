@@ -8,12 +8,14 @@ export const useAuthStore = defineStore('auth', {
 
   getters: {
     isLoggedIn: (state) => !!state.token,
-    isAdmin: (state) => state.user?.role === 'ADMIN'
+    isAdmin:    (state) => state.user?.role === 'ADMIN',
+    isAgent:    (state) => state.user?.role === 'AGENT',
+    isAdminOrAgent: (state) => ['ADMIN', 'AGENT'].includes(state.user?.role)
   },
 
   actions: {
     setAuth(user: any, token: string) {
-      this.user = user
+      this.user  = user
       this.token = token
       if (process.client) {
         localStorage.setItem('token', token)
@@ -25,10 +27,10 @@ export const useAuthStore = defineStore('auth', {
       if (!process.client) return false
       try {
         const token = localStorage.getItem('token')
-        const user = localStorage.getItem('user')
+        const user  = localStorage.getItem('user')
         if (token && user) {
           this.token = token
-          this.user = JSON.parse(user)
+          this.user  = JSON.parse(user)
           return true
         }
       } catch (e) {
@@ -51,7 +53,7 @@ export const useAuthStore = defineStore('auth', {
     },
 
     logout() {
-      this.user = null
+      this.user  = null
       this.token = null
       if (process.client) {
         localStorage.removeItem('token')
