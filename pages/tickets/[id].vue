@@ -44,6 +44,18 @@
             </span>
           </div>
         </div>
+        <!-- Adjuntos -->
+<div v-if="ticket.attachments?.length" class="mt-4 pt-4" style="border-top:1px solid var(--border-soft)">
+  <p class="text-xs font-semibold uppercase tracking-wider mb-2" style="color:var(--muted)">
+    Imágenes adjuntas ({{ ticket.attachments.length }})
+  </p>
+  <div class="flex flex-wrap gap-2">
+    <a v-for="att in ticket.attachments" :key="att.id" :href="att.url" target="_blank">
+      <img :src="att.url" :alt="att.filename" class="w-20 h-20 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+        style="border:1px solid var(--border)" />
+    </a>
+  </div>
+</div>
         <p class="text-sm leading-relaxed whitespace-pre-wrap" style="color:var(--text-2)">{{ ticket.description }}</p>
       </div>
 
