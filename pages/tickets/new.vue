@@ -55,7 +55,6 @@
           required />
       </div>
 
-      <!-- Adjuntos -->
       <div class="field">
         <label class="label">Imágenes adjuntas (opcional)</label>
         <div
@@ -115,10 +114,10 @@ const form = reactive({
   priority: 'MEDIUM'
 })
 
-const attachments    = ref([])  // { file, preview }
-const loading         = ref(false)
-const uploadingFiles  = ref(false)
-const error            = ref('')
+const attachments   = ref([])
+const loading        = ref(false)
+const uploadingFiles = ref(false)
+const error          = ref('')
 
 function handleFiles(e) {
   addFiles(Array.from(e.target.files))
@@ -146,7 +145,6 @@ async function handleSubmit() {
   loading.value = true
   error.value   = ''
   try {
-    // 1. Subir imágenes primero (si hay)
     const uploadedUrls = []
     if (attachments.value.length > 0) {
       uploadingFiles.value = true
@@ -159,7 +157,6 @@ async function handleSubmit() {
       uploadingFiles.value = false
     }
 
-    // 2. Crear el ticket
     await authFetch('/api/tickets', {
       method: 'POST',
       body: { ...form, attachments: uploadedUrls }
