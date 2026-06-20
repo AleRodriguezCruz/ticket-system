@@ -1,6 +1,5 @@
 <template>
   <div class="max-w-2xl">
-    <!-- Header -->
     <div class="flex items-center gap-3 mb-6">
       <button @click="navigateTo('/tickets')" class="btn-ghost">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -8,83 +7,95 @@
         </svg>
         Volver
       </button>
-      <div class="w-px h-4" style="background:var(--border)"></div>
-      <div>
-        <h1 class="text-xl font-semibold tracking-tight" style="color:var(--text)">Nueva Incidencia</h1>
-        <p class="text-xs" style="color:var(--muted)">Reporta un nuevo problema relacionado con Epicor Kinetic</p>
+      <h1 class="text-xl font-semibold tracking-tight" style="color:var(--text)">Nueva Incidencia</h1>
+    </div>
+
+    <form @submit.prevent="handleSubmit" class="card space-y-4">
+      <div class="field">
+        <label class="label">Título <span style="color:var(--danger)">*</span></label>
+        <input v-model="form.title" class="input" placeholder="Describe brevemente el problema" required />
       </div>
-    </div>
 
-    <div class="card">
-      <form @submit.prevent="handleSubmit" class="space-y-5">
+      <div class="grid grid-cols-2 gap-4">
+        <div class="field">
+          <label class="label">Categoría <span style="color:var(--danger)">*</span></label>
+          <select v-model="form.category" class="input" required>
+            <option value="" disabled>Selecciona una categoría</option>
+            <optgroup label="Epicor Kinetic">
+              <option value="Configurador">Configurador (CPQ)</option>
+              <option value="BAQ / Dashboard">BAQ / Dashboard</option>
+              <option value="Method Directive / BPM">Method Directive / BPM</option>
+              <option value="Customización">Customización de pantallas</option>
+              <option value="Usuarios y Permisos">Usuarios y Permisos</option>
+              <option value="Sincronización / Integración">Sincronización / Integración</option>
+              <option value="Materiales">Materiales</option>
+              <option value="Finanzas">Finanzas</option>
+            </optgroup>
+            <optgroup label="General">
+              <option value="Otro">Otro</option>
+            </optgroup>
+          </select>
+        </div>
 
         <div class="field">
-          <label class="label">Título de la incidencia</label>
-          <input v-model="form.title" class="input" placeholder="Ej: Error en configurador de cotización al aplicar descuento" required />
+          <label class="label">Prioridad <span style="color:var(--danger)">*</span></label>
+          <select v-model="form.priority" class="input" required>
+            <option value="LOW">Baja</option>
+            <option value="MEDIUM">Media</option>
+            <option value="HIGH">Alta</option>
+            <option value="CRITICAL">Crítica</option>
+          </select>
         </div>
+      </div>
 
-        <div class="field">
-          <label class="label">Descripción detallada</label>
-          <textarea v-model="form.description" class="input resize-none" style="height:110px"
-            placeholder="Describe el problema con detalle: ¿Qué intentabas hacer? ¿Qué mensaje de error aparece? ¿Con qué frecuencia ocurre?" required />
-        </div>
+      <div class="field">
+        <label class="label">Descripción <span style="color:var(--danger)">*</span></label>
+        <textarea v-model="form.description" class="input resize-none" style="height:140px"
+          placeholder="Describe el problema con el mayor detalle posible: qué intentabas hacer, qué error apareció, en qué módulo, etc."
+          required />
+      </div>
 
-        <div class="grid grid-cols-2 gap-4">
-          <div class="field">
-            <label class="label">Categoría</label>
-            <select v-model="form.category" class="input" required>
-              <option value="" disabled>Seleccionar categoría...</option>
-              <optgroup label="Epicor Kinetic">
-                <option value="Configurador">Configurador (CPQ)</option>
-                <option value="BAQ / Dashboard">BAQ / Dashboard</option>
-                <option value="Method Directive / BPM">Method Directive / BPM</option>
-                <option value="Customización">Customización de pantallas</option>
-                <option value="Usuarios y Permisos">Usuarios y Permisos</option>
-                <option value="Sincronización / Integración">Sincronización / Integración</option>
-                <option value="Materiales">Materiales</option>
-                <option value="Finanzas">Finanzas</option>
-                <option value="Jobs">Jobs / Órdenes de Trabajo</option>
-              </optgroup>
-              <optgroup label="General">
-                <option value="Otro">Otro</option>
-              </optgroup>
-            </select>
-          </div>
-          <div class="field">
-            <label class="label">Prioridad</label>
-            <select v-model="form.priority" class="input" required>
-              <option value="LOW">Baja — Sin impacto inmediato</option>
-              <option value="MEDIUM">Media — Impacto moderado</option>
-              <option value="HIGH">Alta — Afecta operaciones</option>
-              <option value="CRITICAL">Crítica — Sistema detenido</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Priority hint -->
-        <div class="rounded-lg px-4 py-3 flex items-start gap-3" style="background:var(--accent-soft);border:1px solid rgba(26,86,219,0.12)">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1a56db" stroke-width="2" class="flex-shrink-0 mt-0.5">
-            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+      <!-- Adjuntos -->
+      <div class="field">
+        <label class="label">Imágenes adjuntas (opcional)</label>
+        <div
+          class="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors"
+          style="border-color:var(--border)"
+          @click="$refs.fileInput.click()"
+          @dragover.prevent
+          @drop.prevent="handleDrop"
+        >
+          <input ref="fileInput" type="file" accept="image/*" multiple class="hidden" @change="handleFiles" />
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="mx-auto mb-2" style="color:var(--muted)">
+            <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
+            <polyline points="21,15 16,10 5,21"/>
           </svg>
-          <p class="text-xs" style="color:#1648c0;line-height:1.5">
-            Tu incidencia será revisada por el equipo de soporte. Recibirás actualizaciones conforme avance la resolución.
-            Las incidencias críticas se atienden con máxima prioridad.
-          </p>
+          <p class="text-sm" style="color:var(--muted)">Arrastra imágenes aquí o haz clic para seleccionar</p>
+          <p class="text-xs mt-1" style="color:var(--muted-2)">PNG, JPG, GIF, WEBP — máx. 5MB por imagen</p>
         </div>
 
-        <div v-if="error" class="alert-error">{{ error }}</div>
-
-        <div class="flex justify-end gap-2 pt-1">
-          <button type="button" @click="navigateTo('/tickets')" class="btn-secondary">Cancelar</button>
-          <button type="submit" class="btn-primary" :disabled="loading">
-            <svg v-if="loading" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite">
-              <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-            </svg>
-            {{ loading ? 'Creando...' : 'Crear Incidencia' }}
-          </button>
+        <div v-if="attachments.length > 0" class="flex flex-wrap gap-2 mt-3">
+          <div v-for="(att, i) in attachments" :key="i" class="relative">
+            <img :src="att.preview" class="w-16 h-16 object-cover rounded-lg" style="border:1px solid var(--border)" />
+            <button type="button" @click="removeAttachment(i)"
+              class="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full flex items-center justify-center text-white"
+              style="background:#ef4444;font-size:10px">✕</button>
+          </div>
         </div>
-      </form>
-    </div>
+      </div>
+
+      <div v-if="error" class="alert-error">{{ error }}</div>
+
+      <div class="flex justify-end gap-2 pt-2" style="border-top:1px solid var(--border-soft)">
+        <button type="button" @click="navigateTo('/tickets')" class="btn-secondary">Cancelar</button>
+        <button type="submit" class="btn-primary" :disabled="loading">
+          <svg v-if="loading" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation:spin 1s linear infinite">
+            <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+          </svg>
+          {{ loading ? (uploadingFiles ? 'Subiendo imágenes...' : 'Creando...') : 'Crear Incidencia' }}
+        </button>
+      </div>
+    </form>
   </div>
 </template>
 
@@ -93,25 +104,73 @@
 </style>
 
 <script setup>
-import { useAuthStore } from '~/stores/auth'
-const auth    = useAuthStore()
-const error   = ref('')
-const loading = ref(false)
-const form    = reactive({ title: '', description: '', category: '', priority: 'MEDIUM' })
+import { useAuthFetch } from '~/composables/useAuthFetch'
+
+const authFetch = useAuthFetch()
+
+const form = reactive({
+  title: '',
+  description: '',
+  category: '',
+  priority: 'MEDIUM'
+})
+
+const attachments    = ref([])  // { file, preview }
+const loading         = ref(false)
+const uploadingFiles  = ref(false)
+const error            = ref('')
+
+function handleFiles(e) {
+  addFiles(Array.from(e.target.files))
+}
+
+function handleDrop(e) {
+  addFiles(Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/')))
+}
+
+function addFiles(files) {
+  for (const file of files) {
+    if (file.size > 5 * 1024 * 1024) {
+      error.value = `"${file.name}" supera el límite de 5MB`
+      continue
+    }
+    attachments.value.push({ file, preview: URL.createObjectURL(file) })
+  }
+}
+
+function removeAttachment(i) {
+  attachments.value.splice(i, 1)
+}
 
 async function handleSubmit() {
   loading.value = true
   error.value   = ''
   try {
-    await $fetch('/api/tickets', {
+    // 1. Subir imágenes primero (si hay)
+    const uploadedUrls = []
+    if (attachments.value.length > 0) {
+      uploadingFiles.value = true
+      for (const att of attachments.value) {
+        const fd = new FormData()
+        fd.append('file', att.file)
+        const res = await authFetch('/api/tickets/upload', { method: 'POST', body: fd })
+        uploadedUrls.push({ url: res.url, filename: res.filename })
+      }
+      uploadingFiles.value = false
+    }
+
+    // 2. Crear el ticket
+    await authFetch('/api/tickets', {
       method: 'POST',
-      body: { ...form, createdById: auth.user?.id }
+      body: { ...form, attachments: uploadedUrls }
     })
+
     navigateTo('/tickets')
   } catch (e) {
     error.value = e?.data?.message || 'Error al crear el ticket'
   } finally {
     loading.value = false
+    uploadingFiles.value = false
   }
 }
 </script>
