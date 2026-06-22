@@ -12,6 +12,7 @@ export default defineEventHandler(async (event) => {
   if (!allowed.includes(file.type)) {
     throw createError({ statusCode: 400, message: 'Solo se permiten imágenes JPG, PNG, GIF o WEBP' })
   }
+
   if (file.size > 5 * 1024 * 1024) {
     throw createError({ statusCode: 400, message: 'La imagen no puede superar 5 MB' })
   }
