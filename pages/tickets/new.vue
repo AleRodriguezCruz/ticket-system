@@ -11,6 +11,7 @@
     </div>
 
     <form @submit.prevent="handleSubmit" class="card space-y-4">
+
       <div class="field">
         <label class="label">Título <span style="color:var(--danger)">*</span></label>
         <input v-model="form.title" class="input" placeholder="Describe brevemente el problema" required />
@@ -50,40 +51,63 @@
 
       <div class="field">
         <label class="label">Descripción <span style="color:var(--danger)">*</span></label>
-        <textarea v-model="form.description" class="input resize-none" style="height:140px"
+        <textarea
+          v-model="form.description"
+          class="input resize-none"
+          style="height:140px"
           placeholder="Describe el problema con el mayor detalle posible: qué intentabas hacer, qué error apareció, en qué módulo, etc."
-          required />
+          required
+        />
       </div>
 
+      <!-- Adjuntos -->
       <div class="field">
         <label class="label">Imágenes adjuntas (opcional)</label>
         <div
-          class="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors"
+          class="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer"
           style="border-color:var(--border)"
-          @click="$refs.fileInput.click()"
+          @click="triggerFileInput"
           @dragover.prevent
           @drop.prevent="handleDrop"
         >
-          <input ref="fileInput" type="file" accept="image/*" multiple class="hidden" @change="handleFiles" />
+          <input
+            ref="fileInput"
+            type="file"
+            accept="image/*"
+            multiple
+            class="hidden"
+            @change="handleFiles"
+          />
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="mx-auto mb-2" style="color:var(--muted)">
-            <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
+            <rect x="3" y="3" width="18" height="18" rx="2"/>
+            <circle cx="8.5" cy="8.5" r="1.5"/>
             <polyline points="21,15 16,10 5,21"/>
           </svg>
           <p class="text-sm" style="color:var(--muted)">Arrastra imágenes aquí o haz clic para seleccionar</p>
-          <p class="text-xs mt-1" style="color:var(--muted-2)">PNG, JPG, GIF, WEBP — máx. 5MB por imagen</p>
+          <p class="text-xs mt-1" style="color:var(--muted-2)">PNG, JPG, GIF, WEBP — máx. 5 MB por imagen</p>
         </div>
 
+        <!-- Preview imágenes seleccionadas -->
         <div v-if="attachments.length > 0" class="flex flex-wrap gap-2 mt-3">
           <div v-for="(att, i) in attachments" :key="i" class="relative">
-            <img :src="att.preview" class="w-16 h-16 object-cover rounded-lg" style="border:1px solid var(--border)" />
-            <button type="button" @click="removeAttachment(i)"
-              class="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full flex items-center justify-center text-white"
-              style="background:#ef4444;font-size:10px">✕</button>
+            <img
+              :src="att.preview"
+              class="w-16 h-16 object-cover rounded-lg"
+              style="border:1px solid var(--border)"
+            />
+            <button
+              type="button"
+              @click="removeAttachment(i)"
+              class="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full flex items-center justify-center text-white text-xs"
+              style="background:#ef4444;line-height:1"
+            >✕</button>
           </div>
         </div>
       </div>
 
-      <div v-if="error" class="alert-error">{{ error }}</div>
+      <div v-if="error" class="rounded-lg px-3 py-2.5 text-sm" style="background:rgba(220,38,38,0.1);color:#fca5a5;border:1px solid rgba(220,38,38,0.2)">
+        {{ error }}
+      </div>
 
       <div class="flex justify-end gap-2 pt-2" style="border-top:1px solid var(--border-soft)">
         <button type="button" @click="navigateTo('/tickets')" class="btn-secondary">Cancelar</button>
@@ -91,9 +115,10 @@
           <svg v-if="loading" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation:spin 1s linear infinite">
             <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
           </svg>
-          {{ loading ? (uploadingFiles ? 'Subiendo imágenes...' : 'Creando...') : 'Crear Incidencia' }}
+          {{ uploadingFiles ? 'Subiendo imágenes...' : loading ? 'Creando...' : 'Crear Incidencia' }}
         </button>
       </div>
+
     </form>
   </div>
 </template>
@@ -103,24 +128,35 @@
 </style>
 
 <script setup>
-import { useAuthFetch } from '~/composables/useAuthFetch'
+import { useAuthStore } from '~/stores/auth'
 
-const authFetch = useAuthFetch()
+const auth  = useAuthStore()
+const route = useRoute()
+
+// Redirigir si no está autenticado
+if (!auth.isLoggedIn) navigateTo('/login')
 
 const form = reactive({
-  title: '',
+  title:       '',
   description: '',
-  category: '',
-  priority: 'MEDIUM'
+  category:    '',
+  priority:    'MEDIUM'
 })
 
-const attachments   = ref([])
+const fileInput      = ref(null)
+const attachments    = ref([])   // { file, preview }
 const loading        = ref(false)
 const uploadingFiles = ref(false)
 const error          = ref('')
 
+function triggerFileInput() {
+  fileInput.value?.click()
+}
+
 function handleFiles(e) {
   addFiles(Array.from(e.target.files))
+  // Limpiar el input para permitir subir el mismo archivo de nuevo
+  e.target.value = ''
 }
 
 function handleDrop(e) {
@@ -128,9 +164,15 @@ function handleDrop(e) {
 }
 
 function addFiles(files) {
+  error.value = ''
   for (const file of files) {
     if (file.size > 5 * 1024 * 1024) {
-      error.value = `"${file.name}" supera el límite de 5MB`
+      error.value = `"${file.name}" supera el límite de 5 MB`
+      continue
+    }
+    const allowed = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+    if (!allowed.includes(file.type)) {
+      error.value = `"${file.name}" no es un tipo de imagen permitido`
       continue
     }
     attachments.value.push({ file, preview: URL.createObjectURL(file) })
@@ -138,35 +180,45 @@ function addFiles(files) {
 }
 
 function removeAttachment(i) {
+  URL.revokeObjectURL(attachments.value[i].preview)
   attachments.value.splice(i, 1)
 }
 
 async function handleSubmit() {
   loading.value = true
   error.value   = ''
+
   try {
+    // 1. Subir imágenes primero (si hay)
     const uploadedUrls = []
+
     if (attachments.value.length > 0) {
       uploadingFiles.value = true
       for (const att of attachments.value) {
         const fd = new FormData()
         fd.append('file', att.file)
-        const res = await authFetch('/api/tickets/upload', { method: 'POST', body: fd })
+        const res = await $fetch('/api/tickets/upload', {
+          method:  'POST',
+          body:    fd,
+          headers: { Authorization: `Bearer ${auth.token}` }
+        })
         uploadedUrls.push({ url: res.url, filename: res.filename })
       }
       uploadingFiles.value = false
     }
 
-    await authFetch('/api/tickets', {
-      method: 'POST',
-      body: { ...form, attachments: uploadedUrls }
+    // 2. Crear el ticket con los adjuntos ya subidos
+    await $fetch('/api/tickets', {
+      method:  'POST',
+      body:    { ...form, createdById: auth.user?.id, attachments: uploadedUrls },
+      headers: { Authorization: `Bearer ${auth.token}` }
     })
 
     navigateTo('/tickets')
   } catch (e) {
     error.value = e?.data?.message || 'Error al crear el ticket'
   } finally {
-    loading.value = false
+    loading.value        = false
     uploadingFiles.value = false
   }
 }
