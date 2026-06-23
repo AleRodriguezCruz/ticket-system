@@ -140,7 +140,16 @@
 </template>
 
 <script setup>
-const { data: tickets } = await useFetch('/api/tickets')
+import { useAuthStore } from '~/stores/auth'
+
+const auth = useAuthStore()
+
+if (!auth.isLoggedIn) navigateTo('/login')
+
+const { data: tickets } = await useFetch('/api/tickets', {
+  headers: { Authorization: `Bearer ${auth.token}` }
+})
+
 const filtros = reactive({ status: '', priority: '', category: '', search: '' })
 
 const ticketsFiltrados = computed(() =>
