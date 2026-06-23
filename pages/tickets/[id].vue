@@ -49,30 +49,31 @@
         <!-- Descripción -->
         <p class="text-sm leading-relaxed whitespace-pre-wrap mb-4" style="color:var(--text-2)">{{ ticket.description }}</p>
 
-      <!-- Adjuntos -->
-<div v-if="ticket.attachments?.length" class="pt-4" style="border-top:1px solid var(--border-soft)">
-  <p class="text-xs font-semibold uppercase tracking-wider mb-3" style="color:var(--muted)">
-    Imágenes adjuntas ({{ ticket.attachments.length }})
-  </p>
-  <div class="flex flex-wrap gap-2">
-    
-      v-for="att in ticket.attachments"
-      :key="att.id"
-      :href="att.url"
-      target="_blank"
-      rel="noopener"
-    >
-      <img
-        :src="att.url"
-        :alt="att.filename"
-        class="w-24 h-24 object-cover rounded-lg cursor-pointer transition-opacity"
-        style="border:1px solid var(--border)"
-        onmouseover="this.style.opacity='0.75'"
-        onmouseout="this.style.opacity='1'"
-      />
-    </a>
-  </div>
-</div>
+        <!-- Adjuntos -->
+        <div v-if="ticket.attachments?.length" class="pt-4" style="border-top:1px solid var(--border-soft)">
+          <p class="text-xs font-semibold uppercase tracking-wider mb-3" style="color:var(--muted)">
+            Imágenes adjuntas ({{ ticket.attachments.length }})
+          </p>
+          <div class="flex flex-wrap gap-2">
+            <a
+              v-for="att in ticket.attachments"
+              :key="att.id"
+              :href="att.url"
+              target="_blank"
+              rel="noopener"
+            >
+              <img
+                :src="att.url"
+                :alt="att.filename"
+                class="w-24 h-24 object-cover rounded-lg cursor-pointer transition-opacity"
+                style="border:1px solid var(--border)"
+                onmouseover="this.style.opacity='0.75'"
+                onmouseout="this.style.opacity='1'"
+              />
+            </a>
+          </div>
+        </div>
+      </div>
 
       <!-- Solución si existe -->
       <div v-if="ticket.solution" class="card" style="border-color:#bbf7d0;background:#f0fdf4">
@@ -263,7 +264,6 @@ import { useAuthStore } from '~/stores/auth'
 const auth  = useAuthStore()
 const route = useRoute()
 
-// Redirigir si no está autenticado
 if (!auth.isLoggedIn) navigateTo('/login')
 
 const guardando     = ref(false)
@@ -274,12 +274,10 @@ const deleteError   = ref('')
 const newComment    = ref('')
 const addingComment = ref(false)
 
-// Headers con token para todas las peticiones
 const authHeaders = computed(() => ({
   Authorization: `Bearer ${auth.token}`
 }))
 
-// Carga inicial — incluye adjuntos en el include del backend
 const { data: ticket, refresh } = await useFetch(
   `/api/tickets/${route.params.id}`,
   { headers: authHeaders }
