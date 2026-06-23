@@ -110,10 +110,23 @@
 </style>
 
 <script setup>
+import { useAuthStore } from '~/stores/auth'
+
+definePageMeta({ ssr: false })
+
+const auth = useAuthStore()
+
+// Solo admins pueden ver esta página
+if (!auth.isAdmin) navigateTo('/')
+
 const search         = ref('')
 const filterCategory = ref('')
 
-const { data: allTickets } = await useFetch('/api/tickets')
+const { data: allTickets } = await useAsyncData('knowledge-tickets', () =>
+  $fetch('/api/tickets', {
+    headers: { Authorization: `Bearer ${auth.token}` }
+  })
+)
 
 const closedTickets = computed(() =>
   (allTickets.value || []).filter(t => t.status === 'CLOSED' && t.solution)
@@ -126,7 +139,7 @@ const categories = computed(() =>
 const filteredTickets = computed(() =>
   closedTickets.value.filter(t => {
     const matchCat    = !filterCategory.value || t.category === filterCategory.value
-    const matchSearch = !search.value || 
+    const matchSearch = !search.value ||
       t.title.toLowerCase().includes(search.value.toLowerCase()) ||
       t.solution?.toLowerCase().includes(search.value.toLowerCase()) ||
       t.description?.toLowerCase().includes(search.value.toLowerCase())
