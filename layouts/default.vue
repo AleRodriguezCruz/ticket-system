@@ -180,7 +180,9 @@ const pageTitle = computed(() => {
 const openCount = ref(0)
 onMounted(async () => {
   try {
-    const res = await $fetch('/api/stats')
+    const res = await $fetch('/api/stats', {
+      headers: { Authorization: `Bearer ${authStore.token}` }
+    })
     openCount.value = res?.byStatus?.find?.(s => s.label === 'OPEN')?.count ?? res?.byStatus?.OPEN ?? 0
   } catch {}
 })
