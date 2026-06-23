@@ -177,13 +177,14 @@ const pageTitle = computed(() => {
   return m[route.path] || 'TicketSystem'
 })
 
+
 const openCount = ref(0)
 onMounted(async () => {
   try {
-    const res = await $fetch('/api/stats', {
+    const tickets = await $fetch('/api/tickets', {
       headers: { Authorization: `Bearer ${authStore.token}` }
     })
-    openCount.value = res?.byStatus?.find?.(s => s.label === 'OPEN')?.count ?? res?.byStatus?.OPEN ?? 0
+    openCount.value = (tickets as any[])?.filter(t => t.status === 'OPEN').length ?? 0
   } catch {}
 })
 
