@@ -2,20 +2,20 @@ import { prisma } from '~/server/utils/prisma'
 
 export default defineEventHandler(async (event) => {
   const user = event.context.user
-  if (user.role !== 'ADMIN') {
-    throw createError({ statusCode: 403, message: 'Acceso restringido a administradores' })
+  if (!user) {
+    throw createError({ statusCode: 401, message: 'No autenticado' })
   }
 
-  const query = getQuery(event)
-  const where: any = {}
-  if (query.category) where.category = query.category
-  if (query.search) {
-    where.OR = [
-      { title:    { contains: query.search as string, mode: 'insensitive' } },
-      { problem:  { contains: query.search as string, mode: 'insensitive' } },
-      { solution: { contains: query.search as string, mode: 'insensitive' } }
-    ]
-  }
+  const where = user.role === 'USER' ? { createdById: user.id } : {}
 
-  return prisma.knowledgeArticle.findMany({ where, orderBy: { views: 'desc' } })
+  const [open, inProgress, closed] = await Promise.all([
+    prisma.ticket.count({ where: { ...where, status: 'OPEN' } }),
+    prisma.ticket.count({ where: { ...where, status: 'IN_PROGRESS' } }),
+    prisma.ticket.count({ where: { ...where, status: 'CLOSED' } }),
+  ])
+
+  return {
+    byStatus: { OPEN: open, IN_PROGRESS: inProgress, CLOSED: closed },
+    total: open + inProgress + closed
+  }
 })
