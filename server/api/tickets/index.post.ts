@@ -2,9 +2,15 @@ import { prisma } from '~/server/utils/prisma'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
-  const { title, description, category, priority, createdById, attachments } = body
+  const { title, description, category, priority, attachments } = body
 
-  if (!title || !description || !category || !priority || !createdById) {
+  // Usar el usuario autenticado del token JWT (más seguro que confiar en el body)
+  const user = event.context.user
+  if (!user?.id) {
+    throw createError({ statusCode: 401, message: 'No autenticado' })
+  }
+
+  if (!title || !description || !category || !priority) {
     throw createError({ statusCode: 400, message: 'Faltan campos requeridos' })
   }
 
@@ -14,7 +20,7 @@ export default defineEventHandler(async (event) => {
       description,
       category,
       priority,
-      createdById: parseInt(createdById),
+      createdById: user.id,
       ...(attachments?.length > 0 && {
         attachments: {
           create: attachments.map((a: any) => ({
