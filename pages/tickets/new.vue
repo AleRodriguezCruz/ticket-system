@@ -155,7 +155,6 @@ function triggerFileInput() {
 
 function handleFiles(e) {
   addFiles(Array.from(e.target.files))
-  // Limpiar el input para permitir subir el mismo archivo de nuevo
   e.target.value = ''
 }
 
@@ -207,10 +206,10 @@ async function handleSubmit() {
       uploadingFiles.value = false
     }
 
-    // 2. Crear el ticket con los adjuntos ya subidos
+    // 2. Crear el ticket — createdById lo toma el servidor del token JWT
     await $fetch('/api/tickets', {
       method:  'POST',
-      body:    { ...form, createdById: auth.user?.id, attachments: uploadedUrls },
+      body:    { ...form, attachments: uploadedUrls },
       headers: { Authorization: `Bearer ${auth.token}` }
     })
 
