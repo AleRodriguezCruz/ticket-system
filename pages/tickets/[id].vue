@@ -261,6 +261,9 @@
 <script setup>
 import { useAuthStore } from '~/stores/auth'
 
+// Deshabilitar SSR — necesita localStorage para el token
+definePageMeta({ ssr: false })
+
 const auth  = useAuthStore()
 const route = useRoute()
 
@@ -278,19 +281,22 @@ const authHeaders = computed(() => ({
   Authorization: `Bearer ${auth.token}`
 }))
 
-const { data: ticket, refresh } = await useFetch(
-  `/api/tickets/${route.params.id}`,
-  { headers: authHeaders }
+const { data: ticket, refresh } = await useAsyncData('ticket', () =>
+  $fetch(`/api/tickets/${route.params.id}`, {
+    headers: authHeaders.value
+  })
 )
 
-const { data: users } = await useFetch(
-  '/api/users',
-  { headers: authHeaders }
+const { data: users } = await useAsyncData('users', () =>
+  $fetch('/api/users', {
+    headers: authHeaders.value
+  })
 )
 
-const { data: comments, refresh: refreshComments } = await useFetch(
-  `/api/tickets/${route.params.id}/comments`,
-  { headers: authHeaders }
+const { data: comments, refresh: refreshComments } = await useAsyncData('comments', () =>
+  $fetch(`/api/tickets/${route.params.id}/comments`, {
+    headers: authHeaders.value
+  })
 )
 
 const gestion = reactive({
