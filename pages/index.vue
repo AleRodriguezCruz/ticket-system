@@ -142,32 +142,58 @@
 <script setup>
 import { useAuthStore } from '~/stores/auth'
 
-// Deshabilitar SSR — esta página necesita localStorage para el token
 definePageMeta({ ssr: false })
 
 const auth = useAuthStore()
 
 if (!auth.isLoggedIn) navigateTo('/login')
 
-const { data: tickets } = await useAsyncData('tickets', () =>
+const { data: tickets } = await useAsyncData('dashboard-tickets', () =>
   $fetch('/api/tickets', {
     headers: { Authorization: `Bearer ${auth.token}` }
   })
 )
 
-const filtros = reactive({ status: '', priority: '', category: '', search: '' })
+const isAdminOrAgent = computed(() => ['ADMIN','AGENT'].includes(auth.user?.role))
+const firstName = computed(() => auth.user?.name?.split(' ')[0] || 'Usuario')
+const total = computed(() => tickets.value?.length || 0)
 
-const ticketsFiltrados = computed(() =>
-  (tickets.value || []).filter(t => {
-    const matchStatus   = !filtros.status   || t.status   === filtros.status
-    const matchPriority = !filtros.priority || t.priority === filtros.priority
-    const matchCategory = !filtros.category || t.category === filtros.category
-    const matchSearch   = !filtros.search   || t.title.toLowerCase().includes(filtros.search.toLowerCase())
-    return matchStatus && matchPriority && matchCategory && matchSearch
-  })
+const countS   = s => tickets.value?.filter(t => t.status === s).length ?? 0
+const countP   = p => tickets.value?.filter(t => t.priority === p).length ?? 0
+const myTickets= computed(() => tickets.value?.filter(t => t.createdById === auth.user?.id) ?? [])
+const myCount  = s => myTickets.value.filter(t => t.status === s).length
+
+const openPct = computed(() => total.value ? (countS('OPEN') / total.value) * 100 : 0)
+const inPct   = computed(() => total.value ? (countS('IN_PROGRESS') / total.value) * 100 : 0)
+const recentTickets = computed(() =>
+  [...(tickets.value ?? [])].sort((a,b) => new Date(b.createdAt)-new Date(a.createdAt)).slice(0,6)
 )
 
-function clearFilters() {
-  filtros.status = ''; filtros.priority = ''; filtros.category = ''; filtros.search = ''
-}
+const stats = computed(() => [
+  { label:'Abiertos',    value: countS('OPEN'),        sub:'Requieren atención', color:'#059669', bg:'rgba(5,150,105,0.08)',  icon:'<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>' },
+  { label:'En Progreso', value: countS('IN_PROGRESS'), sub:'Siendo atendidos',   color:'#d97706', bg:'rgba(217,119,6,0.08)',  icon:'<circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/>' },
+  { label:'Cerrados',    value: countS('CLOSED'),       sub:'Resueltos',          color:'#475569', bg:'rgba(71,85,105,0.08)', icon:'<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22,4 12,14.01 9,11.01"/>' },
+  { label:'Total',       value: total.value,            sub:'En el sistema',      color:'#1a56db', bg:'rgba(26,86,219,0.08)', icon:'<rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>' },
+])
+
+const statusLegend = computed(() => [
+  { label:'Abiertos',    value: countS('OPEN'),        color:'#059669' },
+  { label:'En Progreso', value: countS('IN_PROGRESS'), color:'#d97706' },
+  { label:'Cerrados',    value: countS('CLOSED'),       color:'#94a3b8' },
+])
+
+const topCategories = computed(() => {
+  const m = {}
+  tickets.value?.forEach(t => { m[t.category] = (m[t.category]||0)+1 })
+  return Object.entries(m).map(([name,count]) => ({name,count}))
+    .sort((a,b)=>b.count-a.count).slice(0,6)
+})
+const maxCat = computed(() => topCategories.value[0]?.count || 1)
+
+const priorityStats = computed(() => [
+  { key:'CRITICAL', label:'Crítica', color:'#dc2626', count: countP('CRITICAL'), badgeStyle:'background:#fef2f2;color:#b91c1c;border:1px solid #fecaca' },
+  { key:'HIGH',     label:'Alta',    color:'#f97316', count: countP('HIGH'),     badgeStyle:'background:#fff7ed;color:#c2410c;border:1px solid #fed7aa' },
+  { key:'MEDIUM',   label:'Media',   color:'#eab308', count: countP('MEDIUM'),   badgeStyle:'background:#fefce8;color:#854d0e;border:1px solid #fde68a' },
+  { key:'LOW',      label:'Baja',    color:'#3b82f6', count: countP('LOW'),      badgeStyle:'background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe' },
+])
 </script>
