@@ -49,31 +49,30 @@
         <!-- Descripción -->
         <p class="text-sm leading-relaxed whitespace-pre-wrap mb-4" style="color:var(--text-2)">{{ ticket.description }}</p>
 
-        <!-- Adjuntos -->
-        <div v-if="ticket.attachments?.length" class="pt-4" style="border-top:1px solid var(--border-soft)">
-          <p class="text-xs font-semibold uppercase tracking-wider mb-3" style="color:var(--muted)">
-            Imágenes adjuntas ({{ ticket.attachments.length }})
-          </p>
-          <div class="flex flex-wrap gap-2">
-            
-              v-for="att in ticket.attachments"
-              :key="att.id"
-              :href="att.url"
-              target="_blank"
-              rel="noopener"
-            >
-              <img
-                :src="att.url"
-                :alt="att.filename"
-                class="w-24 h-24 object-cover rounded-lg cursor-pointer transition-opacity"
-                style="border:1px solid var(--border)"
-                onmouseover="this.style.opacity='0.75'"
-                onmouseout="this.style.opacity='1'"
-              />
-            </a>
-          </div>
-        </div>
-      </div>
+      <!-- Adjuntos -->
+<div v-if="ticket.attachments?.length" class="pt-4" style="border-top:1px solid var(--border-soft)">
+  <p class="text-xs font-semibold uppercase tracking-wider mb-3" style="color:var(--muted)">
+    Imágenes adjuntas ({{ ticket.attachments.length }})
+  </p>
+  <div class="flex flex-wrap gap-2">
+    
+      v-for="att in ticket.attachments"
+      :key="att.id"
+      :href="att.url"
+      target="_blank"
+      rel="noopener"
+    >
+      <img
+        :src="att.url"
+        :alt="att.filename"
+        class="w-24 h-24 object-cover rounded-lg cursor-pointer transition-opacity"
+        style="border:1px solid var(--border)"
+        onmouseover="this.style.opacity='0.75'"
+        onmouseout="this.style.opacity='1'"
+      />
+    </a>
+  </div>
+</div>
 
       <!-- Solución si existe -->
       <div v-if="ticket.solution" class="card" style="border-color:#bbf7d0;background:#f0fdf4">
