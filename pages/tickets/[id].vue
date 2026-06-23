@@ -12,7 +12,7 @@
       <span class="text-sm font-mono font-medium" style="color:var(--muted)">Ticket #{{ ticket.id }}</span>
       <StatusBadge :status="ticket.status" />
       <PriorityBadge :priority="ticket.priority" />
-      <button v-if="auth.user?.role === 'ADMIN'" @click="showDelete = true"
+      <button v-if="auth.isAdmin" @click="showDelete = true"
         class="ml-auto btn-ghost text-xs" style="color:#dc2626"
         onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='transparent'">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -32,6 +32,7 @@
             {{ ticket.category }}
           </span>
         </div>
+
         <div class="flex items-center gap-3 mb-4 pb-4" style="border-bottom:1px solid var(--border-soft)">
           <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
             style="background:linear-gradient(135deg,#1a56db,#3b82f6)">
@@ -44,19 +45,34 @@
             </span>
           </div>
         </div>
+
+        <!-- Descripción -->
+        <p class="text-sm leading-relaxed whitespace-pre-wrap mb-4" style="color:var(--text-2)">{{ ticket.description }}</p>
+
         <!-- Adjuntos -->
-<div v-if="ticket.attachments?.length" class="mt-4 pt-4" style="border-top:1px solid var(--border-soft)">
-  <p class="text-xs font-semibold uppercase tracking-wider mb-2" style="color:var(--muted)">
-    Imágenes adjuntas ({{ ticket.attachments.length }})
-  </p>
-  <div class="flex flex-wrap gap-2">
-    <a v-for="att in ticket.attachments" :key="att.id" :href="att.url" target="_blank">
-      <img :src="att.url" :alt="att.filename" class="w-20 h-20 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
-        style="border:1px solid var(--border)" />
-    </a>
-  </div>
-</div>
-        <p class="text-sm leading-relaxed whitespace-pre-wrap" style="color:var(--text-2)">{{ ticket.description }}</p>
+        <div v-if="ticket.attachments?.length" class="pt-4" style="border-top:1px solid var(--border-soft)">
+          <p class="text-xs font-semibold uppercase tracking-wider mb-3" style="color:var(--muted)">
+            Imágenes adjuntas ({{ ticket.attachments.length }})
+          </p>
+          <div class="flex flex-wrap gap-2">
+            
+              v-for="att in ticket.attachments"
+              :key="att.id"
+              :href="att.url"
+              target="_blank"
+              rel="noopener"
+            >
+              <img
+                :src="att.url"
+                :alt="att.filename"
+                class="w-24 h-24 object-cover rounded-lg cursor-pointer transition-opacity"
+                style="border:1px solid var(--border)"
+                onmouseover="this.style.opacity='0.75'"
+                onmouseout="this.style.opacity='1'"
+              />
+            </a>
+          </div>
+        </div>
       </div>
 
       <!-- Solución si existe -->
@@ -73,8 +89,8 @@
         <p class="text-sm whitespace-pre-wrap leading-relaxed" style="color:#166534">{{ ticket.solution }}</p>
       </div>
 
-      <!-- Gestión (para support / admin) -->
-      <div class="card space-y-4" v-if="auth.user?.role !== 'USER'">
+      <!-- Gestión (solo admin) -->
+      <div class="card space-y-4" v-if="auth.isAdmin">
         <div class="flex items-center gap-2 pb-3" style="border-bottom:1px solid var(--border-soft)">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--muted)">
             <circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
@@ -117,7 +133,9 @@
         </div>
 
         <div v-if="saveSuccess" class="alert-success flex items-center gap-2">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20,6 9,17 4,12"/></svg>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20,6 9,17 4,12"/>
+          </svg>
           Cambios guardados correctamente
         </div>
 
@@ -145,8 +163,7 @@
 
         <!-- Lista de comentarios -->
         <div class="space-y-4 mb-4" v-if="comments?.length">
-          <div v-for="comment in comments" :key="comment.id"
-            class="flex gap-3 group">
+          <div v-for="comment in comments" :key="comment.id" class="flex gap-3 group">
             <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
               style="background:linear-gradient(135deg,#7c3aed,#a78bfa)">
               {{ comment.author?.charAt(0)?.toUpperCase() }}
@@ -157,7 +174,7 @@
                 <span class="text-xs" style="color:var(--muted-2)">
                   {{ new Date(comment.createdAt).toLocaleDateString('es-MX', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' }) }}
                 </span>
-                <button v-if="auth.user?.role !== 'USER'" @click="deleteComment(comment.id)"
+                <button v-if="auth.isAdmin" @click="deleteComment(comment.id)"
                   class="ml-auto opacity-0 group-hover:opacity-100 btn-ghost p-1 transition-opacity" style="color:var(--danger)">
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polyline points="3,6 5,6 21,6"/><path d="M19,6v14a2 2 0 0 1-2,2H7a2 2 0 0 1-2-2V6"/>
@@ -191,6 +208,7 @@
           </div>
         </div>
       </div>
+
     </div>
 
     <!-- Modal eliminar -->
@@ -215,7 +233,9 @@
         <div class="flex justify-end gap-2">
           <button @click="showDelete = false" class="btn-secondary">Cancelar</button>
           <button @click="eliminarTicket" class="btn-primary" :disabled="eliminando"
-            style="background:#dc2626" onmouseover="this.style.background='#b91c1c'" onmouseout="this.style.background='#dc2626'">
+            style="background:#dc2626"
+            onmouseover="this.style.background='#b91c1c'"
+            onmouseout="this.style.background='#dc2626'">
             {{ eliminando ? 'Eliminando...' : 'Eliminar' }}
           </button>
         </div>
@@ -223,6 +243,7 @@
     </div>
   </div>
 
+  <!-- Loading -->
   <div v-else class="flex items-center justify-center h-64">
     <div class="flex items-center gap-3" style="color:var(--muted)">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite">
@@ -239,19 +260,41 @@
 
 <script setup>
 import { useAuthStore } from '~/stores/auth'
-const auth      = useAuthStore()
-const route     = useRoute()
-const guardando = ref(false)
-const saveSuccess = ref(false)
-const showDelete  = ref(false)
-const eliminando  = ref(false)
-const deleteError = ref('')
-const newComment  = ref('')
+
+const auth  = useAuthStore()
+const route = useRoute()
+
+// Redirigir si no está autenticado
+if (!auth.isLoggedIn) navigateTo('/login')
+
+const guardando     = ref(false)
+const saveSuccess   = ref(false)
+const showDelete    = ref(false)
+const eliminando    = ref(false)
+const deleteError   = ref('')
+const newComment    = ref('')
 const addingComment = ref(false)
 
-const { data: ticket, refresh } = await useFetch(`/api/tickets/${route.params.id}`)
-const { data: users }           = await useFetch('/api/users')
-const { data: comments, refresh: refreshComments } = await useFetch(`/api/tickets/${route.params.id}/comments`)
+// Headers con token para todas las peticiones
+const authHeaders = computed(() => ({
+  Authorization: `Bearer ${auth.token}`
+}))
+
+// Carga inicial — incluye adjuntos en el include del backend
+const { data: ticket, refresh } = await useFetch(
+  `/api/tickets/${route.params.id}`,
+  { headers: authHeaders }
+)
+
+const { data: users } = await useFetch(
+  '/api/users',
+  { headers: authHeaders }
+)
+
+const { data: comments, refresh: refreshComments } = await useFetch(
+  `/api/tickets/${route.params.id}/comments`,
+  { headers: authHeaders }
+)
 
 const gestion = reactive({
   status:       ticket.value?.status       || 'OPEN',
@@ -267,12 +310,16 @@ async function actualizarTicket() {
   }
   guardando.value = true
   try {
-    await $fetch(`/api/tickets/${route.params.id}`, { method: 'PATCH', body: gestion })
+    await $fetch(`/api/tickets/${route.params.id}`, {
+      method:  'PATCH',
+      body:    gestion,
+      headers: authHeaders.value
+    })
     await refresh()
     saveSuccess.value = true
     setTimeout(() => saveSuccess.value = false, 3000)
   } catch (e) {
-    alert('Error al actualizar el ticket')
+    alert(e?.data?.message || 'Error al actualizar el ticket')
   } finally {
     guardando.value = false
   }
@@ -283,8 +330,9 @@ async function addComment() {
   addingComment.value = true
   try {
     await $fetch(`/api/tickets/${route.params.id}/comments`, {
-      method: 'POST',
-      body: { text: newComment.value, author: auth.user?.name }
+      method:  'POST',
+      body:    { text: newComment.value, author: auth.user?.name },
+      headers: authHeaders.value
     })
     newComment.value = ''
     await refreshComments()
@@ -297,7 +345,10 @@ async function addComment() {
 
 async function deleteComment(commentId) {
   try {
-    await $fetch(`/api/tickets/${route.params.id}/comments/${commentId}`, { method: 'DELETE' })
+    await $fetch(`/api/tickets/${route.params.id}/comments/${commentId}`, {
+      method:  'DELETE',
+      headers: authHeaders.value
+    })
     await refreshComments()
   } catch {}
 }
@@ -306,7 +357,10 @@ async function eliminarTicket() {
   eliminando.value  = true
   deleteError.value = ''
   try {
-    await $fetch(`/api/tickets/${route.params.id}`, { method: 'DELETE' })
+    await $fetch(`/api/tickets/${route.params.id}`, {
+      method:  'DELETE',
+      headers: authHeaders.value
+    })
     navigateTo('/tickets')
   } catch (e) {
     deleteError.value = e?.data?.message || 'Error al eliminar el ticket'
