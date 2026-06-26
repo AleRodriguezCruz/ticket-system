@@ -20,7 +20,8 @@
     "prisma": "^6.19.2",
     "vue": "^3.5.28",
     "vue-chartjs": "^5.3.3",
-    "vue-router": "^4.6.4"
+    "vue-router": "^4.6.4",
+    "@vercel/blob": "^0.27.0"
   },
   "devDependencies": {
     "@nuxtjs/tailwindcss": "^6.14.0",
