@@ -211,26 +211,19 @@ import { useAuthStore } from '~/stores/auth'
 
 definePageMeta({ ssr: false })
 
-const auth    = useAuthStore()
-const tickets = ref([])
-const loading = ref(true)
+const auth = useAuthStore()
 
-onMounted(async () => {
-  if (!auth.isLoggedIn) { navigateTo('/login'); return }
-  try {
-    tickets.value = await $fetch('/api/tickets', {
-      headers: { Authorization: `Bearer ${auth.token}` }
-    })
-  } catch (e) {
-    console.error('Error cargando tickets:', e)
-  } finally {
-    loading.value = false
-  }
-})
+if (!auth.isLoggedIn) navigateTo('/login')
+
+const { data: tickets } = await useAsyncData('dashboard-tickets', () =>
+  $fetch('/api/tickets', {
+    headers: { Authorization: `Bearer ${auth.token}` }
+  })
+)
 
 const isAdminOrAgent = computed(() => ['ADMIN','AGENT'].includes(auth.user?.role))
-const firstName      = computed(() => auth.user?.name?.split(' ')[0] || 'Usuario')
-const total          = computed(() => tickets.value?.length || 0)
+const firstName = computed(() => auth.user?.name?.split(' ')[0] || 'Usuario')
+const total = computed(() => tickets.value?.length || 0)
 
 const countS    = s => tickets.value?.filter(t => t.status === s).length ?? 0
 const countP    = p => tickets.value?.filter(t => t.priority === p).length ?? 0
