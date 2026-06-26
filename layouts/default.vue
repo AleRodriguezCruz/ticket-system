@@ -184,7 +184,7 @@ onMounted(async () => {
     const tickets = await $fetch('/api/tickets', {
       headers: { Authorization: `Bearer ${authStore.token}` }
     })
-    openCount.value = (tickets as any[])?.filter(t => t.status === 'OPEN').length ?? 0
+    openCount.value = (Array.isArray(tickets) ? tickets : []).filter(t => t.status === 'OPEN').length
   } catch {}
 })
 
