@@ -144,6 +144,8 @@ import { useAuthStore } from '~/stores/auth'
 
 const auth = useAuthStore()
 
+definePageMeta({ ssr: false })
+
 if (!auth.isLoggedIn) navigateTo('/login')
 
 const { data: tickets } = await useFetch('/api/tickets', {
