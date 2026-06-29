@@ -134,6 +134,8 @@ const auth  = useAuthStore()
 const route = useRoute()
 
 // Redirigir si no está autenticado
+definePageMeta({ ssr: false })
+
 if (!auth.isLoggedIn) navigateTo('/login')
 
 const form = reactive({
