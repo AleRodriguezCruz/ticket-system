@@ -196,12 +196,17 @@ async function handleSubmit() {
       for (const att of attachments.value) {
         const fd = new FormData()
         fd.append('file', att.file)
-        const res = await $fetch('/api/tickets/upload', {
+        const res = await fetch('/api/tickets/upload', {
           method:  'POST',
           body:    fd,
           headers: { Authorization: `Bearer ${auth.token}` }
         })
-        uploadedUrls.push({ url: res.url, filename: res.filename })
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}))
+          throw new Error(err.message || `Error ${res.status} al subir imagen`)
+        }
+        const data = await res.json()
+        uploadedUrls.push({ url: data.url, filename: data.filename })
       }
       uploadingFiles.value = false
     }
