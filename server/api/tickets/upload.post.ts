@@ -1,5 +1,3 @@
-import { put } from '@vercel/blob'
-
 export default defineEventHandler(async (event) => {
   const formData = await readFormData(event)
   const file     = formData.get('file') as File
@@ -17,20 +15,16 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, message: 'La imagen no puede superar 5 MB' })
   }
 
-  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
-
   try {
-  // ✅ Después
-const blob = await put(`tickets/${Date.now()}-${safeName}`, file, {
-  access: 'private',
-  addRandomSuffix: false
-})
-    return { url: blob.url, filename: file.name }
+    const buffer = await file.arrayBuffer()
+    const base64 = Buffer.from(buffer).toString('base64')
+    const dataUrl = `data:${file.type};base64,${base64}`
+    return { url: dataUrl, filename: file.name }
   } catch (err: any) {
-    console.error('Error subiendo a Vercel Blob:', err?.message || err)
+    console.error('Error procesando imagen:', err?.message || err)
     throw createError({
       statusCode: 500,
-      message: err?.message || 'Error al subir la imagen'
+      message: err?.message || 'Error al procesar la imagen'
     })
   }
 })
