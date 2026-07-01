@@ -20,10 +20,11 @@ export default defineEventHandler(async (event) => {
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
 
   try {
-    const blob = await put(`tickets/${Date.now()}-${safeName}`, file, {
-      access: 'public',
-      addRandomSuffix: false
-    })
+  // ✅ Después
+const blob = await put(`tickets/${Date.now()}-${safeName}`, file, {
+  access: 'private',
+  addRandomSuffix: false
+})
     return { url: blob.url, filename: file.name }
   } catch (err: any) {
     console.error('Error subiendo a Vercel Blob:', err?.message || err)
