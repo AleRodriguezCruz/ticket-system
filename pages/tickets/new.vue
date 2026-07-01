@@ -87,7 +87,6 @@
           <p class="text-xs mt-1" style="color:var(--muted-2)">PNG, JPG, GIF, WEBP — máx. 5 MB por imagen</p>
         </div>
 
-        <!-- Preview imágenes seleccionadas -->
         <div v-if="attachments.length > 0" class="flex flex-wrap gap-2 mt-3">
           <div v-for="(att, i) in attachments" :key="i" class="relative">
             <img
@@ -130,13 +129,9 @@
 <script setup>
 import { useAuthStore } from '~/stores/auth'
 
-const auth  = useAuthStore()
-const route = useRoute()
-
-// Redirigir si no está autenticado
 definePageMeta({ ssr: false })
 
-if (!auth.isLoggedIn) navigateTo('/login')
+const auth = useAuthStore()
 
 const form = reactive({
   title:       '',
@@ -146,10 +141,18 @@ const form = reactive({
 })
 
 const fileInput      = ref(null)
-const attachments    = ref([])   // { file, preview }
+const attachments    = ref([])
 const loading        = ref(false)
 const uploadingFiles = ref(false)
 const error          = ref('')
+
+onMounted(() => {
+  // Cargar token desde localStorage
+  auth.loadFromStorage()
+  if (!auth.isLoggedIn) {
+    navigateTo('/login')
+  }
+})
 
 function triggerFileInput() {
   fileInput.value?.click()
@@ -186,11 +189,21 @@ function removeAttachment(i) {
 }
 
 async function handleSubmit() {
+  // Asegurarse de que el token esté cargado
+  if (!auth.token) {
+    auth.loadFromStorage()
+  }
+
+  if (!auth.token) {
+    error.value = 'Sesión expirada. Por favor inicia sesión de nuevo.'
+    navigateTo('/login')
+    return
+  }
+
   loading.value = true
   error.value   = ''
 
   try {
-    // 1. Subir imágenes primero (si hay)
     const uploadedUrls = []
 
     if (attachments.value.length > 0) {
@@ -204,8 +217,8 @@ async function handleSubmit() {
           headers: { Authorization: `Bearer ${auth.token}` }
         })
         if (!res.ok) {
-          const err = await res.json().catch(() => ({}))
-          throw new Error(err.message || `Error ${res.status} al subir imagen`)
+          const errData = await res.json().catch(() => ({}))
+          throw new Error(errData.message || `Error ${res.status} al subir imagen`)
         }
         const data = await res.json()
         uploadedUrls.push({ url: data.url, filename: data.filename })
@@ -213,7 +226,6 @@ async function handleSubmit() {
       uploadingFiles.value = false
     }
 
-    // 2. Crear el ticket — createdById lo toma el servidor del token JWT
     await $fetch('/api/tickets', {
       method:  'POST',
       body:    { ...form, attachments: uploadedUrls },
@@ -222,7 +234,7 @@ async function handleSubmit() {
 
     navigateTo('/tickets')
   } catch (e) {
-    error.value = e?.data?.message || 'Error al crear el ticket'
+    error.value = e?.data?.message || e?.message || 'Error al crear el ticket'
   } finally {
     loading.value        = false
     uploadingFiles.value = false
