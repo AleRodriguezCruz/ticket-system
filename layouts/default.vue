@@ -59,7 +59,7 @@
           Nueva Incidencia
         </NuxtLink>
 
-        <NuxtLink to="/knowledge" class="nav-link" :class="{ active: route.path === '/knowledge' }">
+        <NuxtLink v-if="isAdmin" to="/knowledge" class="nav-link" :class="{ active: route.path === '/knowledge' }">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
             <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
             <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
